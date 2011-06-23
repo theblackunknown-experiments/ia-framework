@@ -115,12 +115,10 @@ abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B>
         return pawnMask;
     }
 
-    //FIXME Please test it further...
     public int getOwnerID(int pawnID) {
         return pawnID & getPlayerMask();
     }
 
-    //FIXME Please test it further...
     public int getPawnTypeID(int pawnID) {
         return (pawnID & getPawnMask()) >> getNumberOfTypedPawns();
     }

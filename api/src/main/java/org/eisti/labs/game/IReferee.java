@@ -19,12 +19,8 @@ public interface IReferee<B extends IBoard, C extends GameContext<B>> {
     /** Current context of the game */
     public GameContext getCurrentContext();
 
-//    @Deprecated
-//    public P getPawn(Integer pawnID);
-
     public IPlayer[] getPlayers();
 
-    //TODO Think about automatically adjust the number of information bytes
     int getNumberOfPlayer();
     int getNumberOfTypedPawns();
 
