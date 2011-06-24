@@ -1,8 +1,5 @@
 package org.eisti.labs.game;
 
-import org.eisti.labs.util.Tuple;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 import static org.eisti.labs.util.Validation.nullPresent;
@@ -21,8 +18,10 @@ abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B>
     private int playerMask;
     private int pawnMask;
 
-    protected AbstractReferee(
-            IPlayer... playersDescription) {
+    private int playerBitCursor;
+    private int pawnBitCursor;
+
+    protected AbstractReferee() {
         /*
          * a pawn ID contains informations about
          *  - which player owns that pawn
@@ -37,18 +36,20 @@ abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B>
                 "Not enough bit of information to represent playerID and pawnType within actual representation");
 
         //try to automatically adujst the number of necessary bits
-        int playerBitCursor = 1;
+        playerBitCursor = 1;
         while (numberOfPlayer > Math.pow(2, playerBitCursor))
             playerBitCursor++;
 
         playerMask = (1 << playerBitCursor) - 1;
 
-        int pawnBitCursor = 1;
+        pawnBitCursor = 1;
         while (numberOfTypedPawns > Math.pow(2, pawnBitCursor))
             pawnBitCursor++;
 
         pawnMask = ((1 << pawnBitCursor) - 1) << playerBitCursor;
+    }
 
+    public void setPlayers(IPlayer... playersDescription) {
         require(playersDescription.length != 0, "No player provided");
         require(!nullPresent(playersDescription), "Null player provided");
 
@@ -56,14 +57,6 @@ abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B>
                 playersDescription,
                 playersDescription.length);
     }
-
-    abstract protected IPlayer[] registerPlayers(Tuple<Integer, Class<IPlayer>>... players)
-        //forwaded error cause constructor to fail if any problems
-            throws
-            NoSuchMethodException,
-            InvocationTargetException,
-            IllegalAccessException,
-            InstantiationException;
 
     @Override
     public IPlayer[] getPlayers() {
@@ -120,7 +113,7 @@ abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B>
     }
 
     public int getPawnTypeID(int pawnID) {
-        return (pawnID & getPawnMask()) >> getNumberOfTypedPawns();
+        return (pawnID & getPawnMask()) >> pawnBitCursor;
     }
 
 }

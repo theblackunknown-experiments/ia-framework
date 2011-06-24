@@ -19,11 +19,12 @@ public interface IReferee<B extends IBoard, C extends GameContext<B>> {
     /** Current context of the game */
     public GameContext getCurrentContext();
 
+    public void setPlayers(IPlayer... playersDescription);
     public IPlayer[] getPlayers();
 
-    int getNumberOfPlayer();
-    int getNumberOfTypedPawns();
+    public int getNumberOfPlayer();
+    public int getNumberOfTypedPawns();
 
-    int getPlayerMask();
-    int getPawnMask();
+    public int getPlayerMask();
+    public int getPawnMask();
 }

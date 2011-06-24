@@ -26,7 +26,7 @@ public class Validation {
         return false;
     }
 
-    static class UnsatisfiedCheck extends RuntimeException {
+    public static class UnsatisfiedCheck extends RuntimeException {
         public UnsatisfiedCheck(String message) {
             super(message);
         }

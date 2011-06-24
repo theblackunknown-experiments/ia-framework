@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
  * @author MACHIZAUD Andréa
  * @version 6/20/11
  */
+@Deprecated
 public class AbstractPawnTest {
 
     @Mock

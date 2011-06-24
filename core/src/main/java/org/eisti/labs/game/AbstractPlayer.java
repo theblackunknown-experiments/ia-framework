@@ -15,12 +15,9 @@ public abstract class AbstractPlayer
     /**
      * ID
      */
-    private final int identifier;
+    private int identifier = -1;
 
-    /**
-     * Default constructor, identifier provided.
-     */
-    protected AbstractPlayer(int id) {
+    void setIdentifier(int id) {
         this.identifier = id;
     }
 

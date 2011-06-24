@@ -8,6 +8,7 @@ package org.eisti.labs.game;
  */
 public interface IPlayer {
 
+    public void setIdentifier(int id);
     /**
      * Player's name
      */
