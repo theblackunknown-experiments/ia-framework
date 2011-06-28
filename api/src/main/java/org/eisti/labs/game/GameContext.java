@@ -41,6 +41,9 @@ public abstract class GameContext<B extends IBoard>
         this.history = history;
     }
 
+    /** Branch off purpose only */
+    protected GameContext() {}
+
     public Tuple<IPlayer, Duration> getActivePlayer() {
         return players[0];
     }
@@ -64,28 +67,57 @@ public abstract class GameContext<B extends IBoard>
         return history;
     }
 
-    /** Internal clone */
+    /**
+     * Game's state
+     */
+    abstract public GameState getState();
+
+    /**
+     * This method should return an empty context.
+     * All fields contains in the superclass will be erased
+     */
+    abstract protected GameContext buildEmptyContext();
+
+    /**
+     * Generate derived context from this one
+     */
+    public GameContext branchOff(B board) {
+        GameContext alike = buildEmptyContext();
+
+        //pass remaining time reference
+        alike.elapsedTime = elapsedTime; //FIXME Reference sharing ?
+
+        //update board history
+        IBoard[] previousHistory = getHistory();
+        alike.history = new IBoard[previousHistory.length + 1];
+        alike.history[0] = board;
+        System.arraycopy(
+                previousHistory, 0,
+                alike.history, 1,
+                previousHistory.length);
+
+        //roll player turn
+        Tuple<IPlayer,Duration>[] allPlayers = getPlayers();
+        alike.players = new Tuple[allPlayers.length];
+        System.arraycopy(
+                allPlayers, 1,
+                alike.players, 0,
+                allPlayers.length - 1
+        );
+        alike.players[allPlayers.length - 1] = players[0];
+
+        return alike;
+    }
+
+    /**
+     * Internal clone
+     */
     @Override
     protected GameContext clone() {
         try {
             return (GameContext) super.clone();
         } catch (CloneNotSupportedException ex) {
             throw new Error("CloneException although class is Cloneable");
-        }
-    }
-
-    /**
-     * Game's state
-     */
-    abstract public GameState getState();
-
-    public GameContext change(B board) {
-        if (getBoard().equals(board))
-            return this;
-        else {
-            GameContext alike = clone();
-            alike.history[0] = board;
-            return alike;
         }
     }
 

@@ -28,11 +28,11 @@ public class Ply {
      * moves should be inserted in the order
      * they are means to be applied to the game
      */
-    public Ply(Coordinate firstPosition, Coordinate... otherPositions) {
-        this.positionRegistry = new Coordinate[1 + otherPositions.length];
-        positionRegistry[0] = firstPosition;
-        if (otherPositions.length > 0)
-            System.arraycopy(otherPositions, 0, positionRegistry, 1, otherPositions.length);
+    public Ply(Coordinate... moves) {
+        require(moves.length > 0, "Empty ply, use Ply.PASS for a pass");
+        this.positionRegistry = Arrays.copyOf(
+                moves,
+                moves.length);
     }
 
     /**
@@ -98,7 +98,29 @@ public class Ply {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Ply
-                && ((Ply) obj).hashCode() == hashCode();
+                && obj.hashCode() == hashCode();
+    }
+
+    @Override
+    public String toString() {
+        if (isPass())
+            return "PASS Ply";
+        else if (positionRegistry.length == 1)
+            return String.format(
+                    "Ply(%c,%c)",
+                    (char) ('A' + positionRegistry[0].getColumn()),
+                    (char) ('1' + positionRegistry[0].getRow()));
+        else {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Stroke(");
+            for (Coordinate coord : positionRegistry)
+                sb.append('[')
+                        .append((char) ('A' + coord.getColumn()))
+                        .append((char) ('1' + coord.getRow()))
+                        .append(']');
+            sb.append(')');
+            return sb.toString();
+        }
     }
 
     /**
@@ -109,36 +131,22 @@ public class Ply {
         private final int column;
         private final String representation;
 
-        public static Coordinate Coordinate(int row, int column) {
-            return new Coordinate(row, column);
-        }
-
-        /**
-         * Constructor with array index based parameter
-         */
-        public Coordinate(int row, int column) {
-            require(row >= 0, "row index negative");
-            require(column >= 0, "column index negative");
-            this.row = row;
-            this.column = column;
-            this.representation = String.format(
-                    "Coordinate(%s,%s)",
-                    String.valueOf(row),
-                    String.valueOf(column));
+        public static Coordinate Coordinate(char column, char row) {
+            return new Coordinate(column, row);
         }
 
         /**
          * Constructor with chess index based parameters
          */
-        public Coordinate(char row, char column) {
-            require('0' <= row, "row index out of expected range 0-???");
+        public Coordinate(char column, char row) {
             require('A' <= column, "column index out of expected range A-???");
-            this.row = row - '0';
+            require('1' <= row, "row index out of expected range 0-???");
             this.column = column - 'A';
+            this.row = row - '1';
             this.representation = String.format(
-                    "Coordinate(%s,%s)",
-                    String.valueOf(column),
-                    String.valueOf(row));
+                    "Coordinate(%c,%c)",
+                    column,
+                    row);
         }
 
         public int getRow() {

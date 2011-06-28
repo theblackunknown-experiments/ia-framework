@@ -1,5 +1,6 @@
 package org.eisti.labs.game;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -8,10 +9,11 @@ import java.util.concurrent.TimeUnit;
  * @author MACHIZAUD Andréa
  * @version 6/19/11
  */
-public class Duration {
+public class Duration
+        implements Cloneable, Serializable {
 
     private final TimeUnit unit;
-    private final long time;
+    private final Long time;
 
     public Duration(long time, TimeUnit unit) {
         this.unit = unit;
@@ -98,5 +100,27 @@ public class Duration {
         if (time > 1L)
             sb.append("s");
         return sb.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return 41 * (
+                    41 + unit.hashCode()
+            ) + time.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Duration
+                && obj.hashCode() == this.hashCode();
+    }
+
+    @Override
+    protected Duration clone() {
+        try {
+            return (Duration) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new Error("Clone unsupported on Cloneable");
+        }
     }
 }

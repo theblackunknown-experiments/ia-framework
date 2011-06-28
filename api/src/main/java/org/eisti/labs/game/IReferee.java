@@ -1,6 +1,7 @@
 package org.eisti.labs.game;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Instance which should regulate rules for a specific game.
@@ -11,16 +12,10 @@ import java.util.List;
 public interface IReferee<B extends IBoard, C extends GameContext<B>> {
 
     /** Legal moves from this board */
-    public List<Ply> getLegalMoves(C context);
+    public Set<Ply> getLegalMoves(C context);
 
     /** Generate sub-board based on given one where playerPly is applied */
-    public B generateSubGame(B previousBoard, Ply playerPly);
-
-    /** Current context of the game */
-    public GameContext getCurrentContext();
-
-    public void setPlayers(IPlayer... playersDescription);
-    public IPlayer[] getPlayers();
+    public C generateNewContextFrom(C previousContext, Ply playerPly);
 
     public int getNumberOfPlayer();
     public int getNumberOfTypedPawns();

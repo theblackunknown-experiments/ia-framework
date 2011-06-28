@@ -23,7 +23,7 @@ public class Tuple<K, V> {
     @SuppressWarnings("unchecked")
     public static <K, V> Tuple<K, V>[] zip(K[] firsts, V[] seconds) {
         int length = Math.min(firsts.length, seconds.length);
-        Tuple<K, V>[] results = (Tuple<K, V>[]) new Object[length];
+        Tuple<K,V>[] results = new Tuple[length];
         for (int i = length; i-- > 0; )
             results[i] = Tuple(firsts[i], seconds[i]);
         return results;

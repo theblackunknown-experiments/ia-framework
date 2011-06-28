@@ -17,7 +17,7 @@ public abstract class AbstractPlayer
      */
     private int identifier = -1;
 
-    void setIdentifier(int id) {
+    public void setIdentifier(int id) {
         this.identifier = id;
     }
 

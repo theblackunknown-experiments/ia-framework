@@ -1,14 +1,14 @@
 package org.eisti.labs.ia;
 
 import org.eisti.labs.game.GameContext;
+import org.eisti.labs.game.IPlayer;
 
 /**
- * Game situation that can be evaluated for compatibility with tree-like strategy
- *
  * @author MACHIZAUD Andréa
- * @version 17/06/11
+ * @version 28/06/11
  */
-public interface ISituation {
+public interface IBot
+        extends IPlayer {
 
     /**
      * Return a score evaluating the current game's situation

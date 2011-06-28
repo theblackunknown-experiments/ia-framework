@@ -26,6 +26,10 @@ abstract public class AbstractBoard
      */
     private final Dimension boardDimension;
 
+
+    private char[] COLUMN_LABELS;
+    private char[] ROW_LABELS;
+
     /**
      * General constructor
      *
@@ -35,14 +39,25 @@ abstract public class AbstractBoard
     protected AbstractBoard(int width, int height) {
         boardDimension = new Dimension(width, height);
 
+
+        //FIXME width or height > 26
+
+        COLUMN_LABELS = new char[width];
+        for (char i = 0; i < width; i++)
+            COLUMN_LABELS[i] = (char) ('A' + i);
+
+        ROW_LABELS = new char[height];
+        for (char i = 0; i < height; i++)
+            ROW_LABELS[i] = (char) ('1' + i);
+
         board = new ICase[width * height];
 
-            for (int i = height; i-- > 0; )
-                for (int j = width; j-- > 0; )
-                    board[getBoardIndex(i, j)] = new Case(i, j);
-            initializeBoard();
-            require(boardInitialized(board),
-                    "Some case were not initialized");
+        for (int i = height; i-- > 0; )
+            for (int j = width; j-- > 0; )
+                board[getBoardIndex(i, j)] = new Case(i, j);
+        initializeBoard();
+        require(boardInitialized(board),
+                "Some case were not initialized");
     }
 
     /**
@@ -91,23 +106,23 @@ abstract public class AbstractBoard
                 neighborhood.add(
                         getCase(
                                 center.getPosition().getRow() + 1,
-                                center.getPosition().getRow()));
+                                center.getPosition().getColumn()));
                 break;
             case 7: //last row
                 neighborhood.add(
                         getCase(
                                 center.getPosition().getRow() - 1,
-                                center.getPosition().getRow()));
+                                center.getPosition().getColumn()));
                 break;
             default: //otherwise
                 neighborhood.add(
                         getCase(
                                 center.getPosition().getRow() + 1,
-                                center.getPosition().getRow()));
+                                center.getPosition().getColumn()));
                 neighborhood.add(
                         getCase(
                                 center.getPosition().getRow() - 1,
-                                center.getPosition().getRow()));
+                                center.getPosition().getColumn()));
 
         }
 
@@ -116,23 +131,23 @@ abstract public class AbstractBoard
             case 0: // first column
                 neighborhood.add(
                         getCase(
-                                center.getPosition().getColumn(),
+                                center.getPosition().getRow(),
                                 center.getPosition().getColumn() + 1));
                 break;
             case 7: // last column
                 neighborhood.add(
                         getCase(
-                                center.getPosition().getColumn(),
+                                center.getPosition().getRow(),
                                 center.getPosition().getColumn() - 1));
                 break;
             default: //otherwise
                 neighborhood.add(
                         getCase(
-                                center.getPosition().getColumn(),
+                                center.getPosition().getRow(),
                                 center.getPosition().getColumn() + 1));
                 neighborhood.add(
                         getCase(
-                                center.getPosition().getColumn(),
+                                center.getPosition().getRow(),
                                 center.getPosition().getColumn() - 1));
 
         }
@@ -180,9 +195,52 @@ abstract public class AbstractBoard
     }
 
     @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        int width = getDimension().width;
+        int height = getDimension().height;
+
+        int gridSize = width * 2 + 1;
+
+        String separatorLine = null;
+        {
+            StringBuilder separatorBuilder = new StringBuilder(gridSize + 2);
+            separatorBuilder.append('\n');
+            separatorBuilder.append(' ');
+            for (int columnCursor = gridSize; columnCursor-- > 0; )
+                separatorBuilder.append('-');
+            separatorBuilder.append('\n');
+            separatorLine = separatorBuilder.toString();
+        }
+
+        sb.append(' ');
+        for (int columnCursor = 0; columnCursor < width; columnCursor++) {
+            sb.append(' ')
+                    .append(COLUMN_LABELS[columnCursor]);
+        }
+
+        //header
+        sb.append(separatorLine);
+        for (int lineCursor = 0; lineCursor < height; lineCursor++) {
+            //line - pawn
+            sb.append(ROW_LABELS[lineCursor])
+                    .append('|');
+            for (int columnCursor = 0; columnCursor < width; columnCursor++) {
+                sb.append(getCase(lineCursor, columnCursor).getPawnID())
+                        .append('|');
+            }
+            //line - separator
+            sb.append(separatorLine);
+        }
+
+        return sb.toString();
+    }
+
+    @Override
     public boolean equals(Object that) {
         return that instanceof AbstractBoard
-                && ((AbstractBoard) that).hashCode() == this.hashCode();
+                && that.hashCode() == this.hashCode();
     }
 
     /**
@@ -203,7 +261,10 @@ abstract public class AbstractBoard
         protected Case(int row, int column) {
             require(0 <= row && row < getDimension().getWidth(), "row index is out of board");
             require(0 <= column && column < getDimension().getHeight(), "column index is out of board");
-            this.position = new Ply.Coordinate(row, column);
+            this.position = new Ply.Coordinate(
+                    (char) (column + 'A'),
+                    (char) (row + '1')
+            );
         }
 
         public void setPawnID(int occupantID) {
@@ -225,8 +286,8 @@ abstract public class AbstractBoard
             return occupantID == NO_PAWN
                     ? 0
                     : 41 * (
-                            occupantID
-                    ) + position.hashCode();
+                    occupantID
+            ) + position.hashCode();
         }
     }
 

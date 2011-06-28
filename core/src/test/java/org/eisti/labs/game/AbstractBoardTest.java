@@ -6,11 +6,11 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static org.eisti.labs.game.Ply.Coordinate.Coordinate;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -75,10 +75,10 @@ public class AbstractBoardTest {
         IBoard.ICase filledCase = mock(IBoard.ICase.class);
         IBoard.ICase emptyArea = mock(IBoard.ICase.class);
 
-        int randomPawnID = 4;
+        int arbitraryPawnID = 4;
 
         when(filledCase.getPawnID())
-                .thenReturn(randomPawnID);
+                .thenReturn(arbitraryPawnID);
         when(emptyArea.getPawnID())
                 .thenReturn(IBoard.ICase.NO_PAWN);
 
@@ -92,7 +92,7 @@ public class AbstractBoardTest {
                 .thenReturn(emptyArea);
 
         assertTrue("Bad Pawn at given coordinate",
-                randomPawnID == boardMock.getCase(4, 6).getPawnID());
+                arbitraryPawnID == boardMock.getCase(4, 6).getPawnID());
         assertTrue("Pawn found where none should be",
                 IBoard.ICase.NO_PAWN == boardMock.getCase(4, 4).getPawnID());
     }
@@ -103,13 +103,13 @@ public class AbstractBoardTest {
         when(boardMock.getDimension())
                 .thenReturn(NORMAL_GRID);
 
-        IBoard.ICase top = mock(IBoard.ICase.class);
-        IBoard.ICase bottom = mock(IBoard.ICase.class);
-        IBoard.ICase left = mock(IBoard.ICase.class);
-        IBoard.ICase right = mock(IBoard.ICase.class);
+        final IBoard.ICase top = mock(IBoard.ICase.class);
+        final IBoard.ICase bottom = mock(IBoard.ICase.class);
+        final IBoard.ICase left = mock(IBoard.ICase.class);
+        final IBoard.ICase right = mock(IBoard.ICase.class);
 
         IBoard.ICase center = mock(IBoard.ICase.class);
-        Ply.Coordinate mid_grid = Coordinate(4, 4);
+        Ply.Coordinate mid_grid = Coordinate('E', '5');
 
         when(center.getPosition())
                 .thenReturn(mid_grid);
@@ -126,21 +126,21 @@ public class AbstractBoardTest {
         when(boardMock.getCaseAround(center))
                 .thenCallRealMethod();
 
-        IBoard.ICase[] callResult = boardMock.getCaseAround(center);
-        IBoard.ICase[] expectedResult = new IBoard.ICase[]{
-                bottom,
-                top,
-                right,
-                left
-        };
+        final IBoard.ICase[] callResult = boardMock.getCaseAround(center);
+        final Collection<IBoard.ICase> expectedResult = new ArrayList<IBoard.ICase>(4) {{
+            add(bottom);
+            add(top);
+            add(right);
+            add(left);
+        }};
 
         assertEquals("Size differs",
-                expectedResult.length,
+                expectedResult.size(),
                 callResult.length);
 
-        assertArrayEquals("Content differs",
-                expectedResult,
-                callResult);
+        for (IBoard.ICase area : callResult)
+            assertTrue("Content differs",
+                    expectedResult.contains(area));
     }
 
     @Test
@@ -155,7 +155,7 @@ public class AbstractBoardTest {
         IBoard.ICase right = mock(IBoard.ICase.class);
 
         IBoard.ICase center = mock(IBoard.ICase.class);
-        Ply.Coordinate mid_grid = Coordinate(4, 4);
+        Ply.Coordinate mid_grid = Coordinate('E', '5');
 
 
         int randomPawnID = 4;

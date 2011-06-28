@@ -1,6 +1,9 @@
 package org.eisti.labs.game;
 
-import java.util.Arrays;
+import org.eisti.labs.util.Tuple;
+
+import java.util.LinkedList;
+import java.util.Queue;
 
 import static org.eisti.labs.util.Validation.nullPresent;
 import static org.eisti.labs.util.Validation.require;
@@ -12,9 +15,6 @@ import static org.eisti.labs.util.Validation.require;
 abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B>>
         implements IReferee<B, C> {
 
-    private IPlayer[] players;
-    private int playerTurnToken = 0;//player that start the game is the first in the previous array
-
     private int playerMask;
     private int pawnMask;
 
@@ -23,7 +23,7 @@ abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B>
 
     protected AbstractReferee() {
         /*
-         * a pawn ID contains informations about
+         * a pawn ID contains information about
          *  - which player owns that pawn
          *  - which type of pawn it is
          * and is represented as an int.
@@ -35,7 +35,7 @@ abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B>
         require(numberOfPlayer + numberOfTypedPawns < 32,
                 "Not enough bit of information to represent playerID and pawnType within actual representation");
 
-        //try to automatically adujst the number of necessary bits
+        //try to automatically adjust the number of necessary bits
         playerBitCursor = 1;
         while (numberOfPlayer > Math.pow(2, playerBitCursor))
             playerBitCursor++;
@@ -47,57 +47,6 @@ abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B>
             pawnBitCursor++;
 
         pawnMask = ((1 << pawnBitCursor) - 1) << playerBitCursor;
-    }
-
-    public void setPlayers(IPlayer... playersDescription) {
-        require(playersDescription.length != 0, "No player provided");
-        require(!nullPresent(playersDescription), "Null player provided");
-
-        players = Arrays.copyOf(
-                playersDescription,
-                playersDescription.length);
-    }
-
-    @Override
-    public IPlayer[] getPlayers() {
-        return players;
-    }
-
-    public IPlayer[] getOrderedPlayers() {
-        if (playerTurnToken != 0) {
-            IPlayer[] orderedPlayers = new IPlayer[players.length];
-            //copy elder players
-            System.arraycopy(
-                    players, 0,
-                    orderedPlayers, players.length - playerTurnToken,
-                    playerTurnToken);
-            //copy recent players
-            System.arraycopy(
-                    players, playerTurnToken,
-                    orderedPlayers, 0,
-                    players.length - playerTurnToken);
-            return orderedPlayers;
-        } else
-            return players;
-    }
-
-    public IPlayer getActivePlayer() {
-        return players[playerTurnToken];
-    }
-
-    public void slidePlayersTurn() {
-        playerTurnToken = (playerTurnToken + 1) % players.length;
-    }
-
-    protected Ply translate(IBoard.ICase[] coordinateStroke) {
-        if (coordinateStroke.length == 1)
-            return new Ply(coordinateStroke[0].getPosition());
-        else {
-            Ply.Coordinate[] argument = new Ply.Coordinate[coordinateStroke.length - 1];
-            for (int i = 1; i < coordinateStroke.length; i++)
-                argument[i - 1] = coordinateStroke[i].getPosition();
-            return new Ply(coordinateStroke[0].getPosition(), argument);
-        }
     }
 
     public int getPlayerMask() {

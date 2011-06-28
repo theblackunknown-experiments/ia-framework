@@ -1,12 +1,13 @@
 package org.eisti.labs.game;
 
+import org.eisti.labs.util.Tuple;
 import org.eisti.labs.util.Validation;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.eisti.labs.util.Validation.require;
@@ -26,6 +27,8 @@ public class Match
         IBoard board = null;
         GameContext gameContext = null;
         IReferee referee = null;
+        IPlayer[] players = null;
+        long timeGranted = -1;
 
         // 1 - check parameter
         //TODO Refactor checking against rights restrictions systems (i.e WebStart)
@@ -64,6 +67,13 @@ public class Match
                 {
                     gameContextClazzImplementation = validate(GAME_CONTEXT_CLASS_KEY,
                             fileProperties.getProperty(GAME_CONTEXT_CLASS_KEY));
+                }
+                /*=========================================================================
+                                       GRANTED TIME
+                  =========================================================================*/
+                {
+                    timeGranted = Long.parseLong(validate(PLAY_TIME_KEY,
+                            fileProperties.getProperty(PLAY_TIME_KEY)));
                 }
                 /*=========================================================================
                                          PLAYERS
@@ -106,13 +116,19 @@ public class Match
                                        GAME CONTEXT
                 =========================================================================*/
                 {
-                    gameContextClazzImplementation = validate(GAME_CONTEXT_CLASS_KEY,args[2]);
+                    gameContextClazzImplementation = validate(GAME_CONTEXT_CLASS_KEY, args[2]);
+                }
+                /*=========================================================================
+                                       GRANTED TIME
+                  =========================================================================*/
+                {
+                    timeGranted = Long.parseLong(validate(PLAY_TIME_KEY, args[3]));
                 }
                 /*=========================================================================
                                          PLAYERS
                   =========================================================================*/
                 {
-                    int argOffset = 3;
+                    int argOffset = 4;
                     int playerNumber = referee.getNumberOfPlayer();
                     playersClassImplementation = new String[playerNumber];
                     //fill player container
@@ -133,7 +149,7 @@ public class Match
             require(refereeClazzImplementation != null, "Undetected operations which result in no referee");
             require(playersClassImplementation != null, "Undetected operations which result in no players");
             require(boardClazzImplementation != null, "Undetected operations which result in no board");
-            // Any ?
+            require(timeGranted != -1, "Undetected operations which result in no time argument");
             /*=========================================================================
                                    INSTANTIATION
               =========================================================================*/
@@ -149,19 +165,16 @@ public class Match
                                    PLAYERS
             =========================================================================*/
             {
-                IPlayer[] players = new IPlayer[playersClassImplementation.length];
+                players = new IPlayer[playersClassImplementation.length];
                 for (int i = players.length; i-- > 0; ) {
                     String playerClazz = playersClassImplementation[i];
-                    int playerID = i + 1;
+                    int playerID = i;
                     //create player
                     players[i] = (IPlayer) Class.forName(playerClazz)
                             .getConstructor()
                             .newInstance();
                     players[i].setIdentifier(playerID);
                 }
-
-                //register players
-                referee.setPlayers(players);
                 //available for GC
                 playersClassImplementation = null;
             }
@@ -170,28 +183,30 @@ public class Match
                                 INITIALIZE GAME
               =========================================================================*/
 
-            //TODO Handle duration passing styles
+            Duration[] playersTime = new Duration[players.length];
+            Arrays.fill(
+                    playersTime,
+                    new Duration(timeGranted, TimeUnit.MILLISECONDS)
+            );
+
             gameContext = (GameContext) Class.forName(gameContextClazzImplementation)
-                        .getConstructor(
+                    .getConstructor(
                             Duration.class,
                             IBoard[].class,
                             IPlayer[].class,
                             Duration[].class
-                        )
-                        .newInstance(
+                    )
+                    .newInstance(
                             new Duration(0L, TimeUnit.MILLISECONDS),
-                            new IBoard[]{ board },
-                            referee.getPlayers(),
-                            null
-                        );
-
-            //TODO Implement that very important method
-            referee.setInitialGameContext(gameContext);
+                            new IBoard[]{board},
+                            players,
+                            playersTime
+                    );
 
             //at last, we can play...
-            run(referee);
+            run(referee, gameContext);
         } catch (Validation.UnsatisfiedCheck e) {
-            throw new GameException(e.getLocalizedMessage());
+            throw new GameException(e.getLocalizedMessage(),e);
         } catch (NumberFormatException e) {
             throw new GameException("Error trying to convert a number", e);
         } catch (FileNotFoundException e) {
@@ -201,7 +216,7 @@ public class Match
         } catch (InvocationTargetException e) {
             throw new GameException("Could not invoke given class", e);
         } catch (NoSuchMethodException e) {
-            throw new GameException("There is no `ìnt` only constructor for that class", e);
+            throw new GameException("Constructor not found", e);
         } catch (ClassNotFoundException e) {
             throw new GameException("Class not found, check your classpath", e);
         } catch (InstantiationException e) {
@@ -220,23 +235,99 @@ public class Match
             return item;
     }
 
+    //FIXME time ignored as first shot
+    /*
+     * IDEA : Reference should be shared between timer task,
+     * (which are designed to update remaining time and alert when depleted)
+     * and context (which are mean to only display it).
+     *
+     * My first concurrency experience... can't wait :-)
+     */
+    @SuppressWarnings("unchecked")
     private static void run(
-            final IReferee referee) {
-        //Game logic
+            final IReferee referee,
+            final GameContext initialContext) {
 
+
+        //Global variables
+        Tuple<IPlayer, Duration> currentPlayer = null;
+        GameContext currentContext = initialContext;
+        Set<Ply> allowedMoves = new HashSet<Ply>();
+        Ply playerPly = null;
+        boolean plyAccepted = false;
+
+        //XXX : Check initial State ? Context ?
+        require(currentContext.getState() == GameContext.GameState.NOT_YET_FINISH,
+                "Game is already finish although nobody has played yet");
+
+        //Game loop
+        //I know that can be enhanced...
+        do {
+            //fetch current player
+            currentPlayer = currentContext.getActivePlayer();
+            //fetch possible moves
+            allowedMoves.clear();
+            allowedMoves.addAll(
+                    referee.getLegalMoves(currentContext));
+
+            do {
+                if (System.getProperty("hints") != null) {
+                    System.out.println("Allowed moves : " + allowedMoves);
+                }
+                //TODO Start chronometer here
+                //ask the player for his ply
+                playerPly = currentPlayer.getFirst().play(currentContext);
+                //TODO End it here
+
+                //check the ply against referee's authority
+                plyAccepted = allowedMoves.contains(playerPly);
+                if (!plyAccepted)
+                    System.err.println(playerPly + " is not a valid move for this board");
+
+            } //loop until a valid move is entered
+            while (!plyAccepted);
+
+            //update game context
+            currentContext = referee
+                    .generateNewContextFrom(currentContext, playerPly);
+
+        } //loop until the game is finished
+        while (currentContext.getState() == GameContext.GameState.NOT_YET_FINISH);
+
+        //announce the final state conclusion
+        switch (currentContext.getState()) {
+            case DRAW:
+                System.out.println("Draw Game !");
+                break;
+            case WIN:
+                System.out.println(String.format(
+                        "Player#%s won !",
+                        currentContext.getActivePlayer()));
+                break;
+            case LOSE:
+                System.out.println(String.format(
+                        "Player#%s lose !",
+                        currentContext.getActivePlayer()));
+                break;
+        }
+        //some time statistics
+        System.out.println("Game finished in " + currentContext.getElapsedTime());
     }
 }
 
 interface GameProperties {
 
     public static final String USAGE =
-            "Usage : java -jar api-0.1.jar <referee impl> <board implementations> [<playerX implementation> | ... ]";
+            "Usage : java -jar api-0.1.jar " +
+                    "<referee impl> <board implementations> <context implementation> <time granted> [<playerX implementation> | ... ]";
 
     public static final String PROPERTY_FILE_PARAMETER = "game.properties";
 
     public static final String REFEREE_KEY = "referee";
 
     public static final String BOARD_CLASS_KEY = "board";
+
+    public static final String PLAY_TIME_KEY = "time-granted";
 
     public static final String GAME_CONTEXT_CLASS_KEY = "game-context";
 
