@@ -169,9 +169,13 @@ public abstract class GameContext<B extends IBoard, C extends GameContext>
                 allPlayers.length - newPlayerIdx
         );
         if (newPlayerIdx != 0)
+            //FIXME Is it different if length is odd or even ?
             System.arraycopy(
                     allPlayers, 0,
-                    alike.players, newPlayerIdx,//FIXME Is it different if length is odd or even ?
+                    alike.players,
+                    allPlayers.length % 2 == 0
+                            ? newPlayerIdx
+                            : newPlayerIdx + 1,
                     newPlayerIdx
             );
 
