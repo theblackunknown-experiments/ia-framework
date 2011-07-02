@@ -30,7 +30,7 @@ import java.util.Set;
  * @author MACHIZAUD Andréa
  * @version 17/06/11
  */
-public interface IReferee<B extends IBoard, C extends GameContext<B>> {
+public interface IReferee<B extends IBoard, C extends GameContext<B,C>> {
 
     /** Legal moves from this board */
     public Set<Ply> getLegalMoves(C context);

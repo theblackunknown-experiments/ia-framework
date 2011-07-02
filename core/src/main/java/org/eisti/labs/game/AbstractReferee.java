@@ -21,19 +21,13 @@
  */
 package org.eisti.labs.game;
 
-import org.eisti.labs.util.Tuple;
-
-import java.util.LinkedList;
-import java.util.Queue;
-
-import static org.eisti.labs.util.Validation.nullPresent;
 import static org.eisti.labs.util.Validation.require;
 
 /**
  * @author MACHIZAUD Andréa
  * @version 6/20/11
  */
-abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B>>
+abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B, C>>
         implements IReferee<B, C> {
 
     private int playerMask;

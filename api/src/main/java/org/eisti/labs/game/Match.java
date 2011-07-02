@@ -278,7 +278,7 @@ public class Match
         boolean plyAccepted = false;
 
         //XXX : Check initial State ? Context ?
-        require(currentContext.getState() == GameContext.GameState.NOT_YET_FINISH,
+        require(currentContext.getState() == GameContext.GameState.RUNNING,
                 "Game is already finish although nobody has played yet");
 
         //Game loop
@@ -313,7 +313,7 @@ public class Match
                     .generateNewContextFrom(currentContext, playerPly);
 
         } //loop until the game is finished
-        while (currentContext.getState() == GameContext.GameState.NOT_YET_FINISH);
+        while (currentContext.getState() == GameContext.GameState.RUNNING);
 
         //announce the final state conclusion
         switch (currentContext.getState()) {

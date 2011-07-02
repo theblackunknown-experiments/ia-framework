@@ -31,7 +31,7 @@ import static org.eisti.labs.util.Tuple.zip;
  * @author MACHIZAUD Andréa
  * @version 17/06/11
  */
-public abstract class GameContext<B extends IBoard>
+public abstract class GameContext<B extends IBoard, C extends GameContext>
         implements Cloneable {
 
     /**
@@ -62,8 +62,11 @@ public abstract class GameContext<B extends IBoard>
         this.history = history;
     }
 
-    /** Branch off purpose only */
-    protected GameContext() {}
+    /**
+     * Branch off purpose only
+     */
+    protected GameContext() {
+    }
 
     public Tuple<IPlayer, Duration> getActivePlayer() {
         return players[0];
@@ -97,13 +100,13 @@ public abstract class GameContext<B extends IBoard>
      * This method should return an empty context.
      * All fields contains in the superclass will be erased
      */
-    abstract protected GameContext buildEmptyContext();
+    abstract protected C buildEmptyContext();
 
     /**
      * Generate derived context from this one
      */
-    public GameContext branchOff(B board) {
-        GameContext alike = buildEmptyContext();
+    public C branchOff(B board) {
+        C alike = buildEmptyContext();
 
         //pass remaining time reference
         alike.elapsedTime = elapsedTime; //FIXME Reference sharing ?
@@ -118,7 +121,7 @@ public abstract class GameContext<B extends IBoard>
                 previousHistory.length);
 
         //roll player turn
-        Tuple<IPlayer,Duration>[] allPlayers = getPlayers();
+        Tuple<IPlayer, Duration>[] allPlayers = getPlayers();
         alike.players = new Tuple[allPlayers.length];
         System.arraycopy(
                 allPlayers, 1,
@@ -131,12 +134,58 @@ public abstract class GameContext<B extends IBoard>
     }
 
     /**
+     * Allow to keep same perspective but with changing current player, but with player order respected
+     */
+    protected C changePerspective(IPlayer newCurrentPlayer) {
+        C alike = buildEmptyContext();
+
+        //pass remaining time reference
+        alike.elapsedTime = elapsedTime; //FIXME Reference sharing ?
+
+        //update board history
+        IBoard[] previousHistory = getHistory();
+        alike.history = new IBoard[previousHistory.length];
+        System.arraycopy(
+                previousHistory, 0,
+                alike.history, 0,
+                previousHistory.length);
+
+        //roll player turn
+        Tuple<IPlayer, Duration>[] allPlayers = getPlayers();
+        int newPlayerIdx = -1;
+
+        for (int i = allPlayers.length; i-- > 0; )
+            if (allPlayers[i].getFirst() == newCurrentPlayer) {
+                newPlayerIdx = i;
+                break;
+            }
+        if (newPlayerIdx == -1)
+            throw new IllegalStateException("Given player doesn't exists in this game : "
+                    + newCurrentPlayer);
+        alike.players = new Tuple[allPlayers.length];
+        System.arraycopy(
+                allPlayers, newPlayerIdx,
+                alike.players, 0,
+                allPlayers.length - newPlayerIdx
+        );
+        if (newPlayerIdx != 0)
+            System.arraycopy(
+                    allPlayers, 0,
+                    alike.players, newPlayerIdx,//FIXME Is it different if length is odd or even ?
+                    newPlayerIdx
+            );
+
+        return alike;
+    }
+
+    /**
      * Internal clone
      */
     @Override
-    protected GameContext clone() {
+    @SuppressWarnings("unchecked")
+    protected C clone() {
         try {
-            return (GameContext) super.clone();
+            return (C) super.clone();
         } catch (CloneNotSupportedException ex) {
             throw new Error("CloneException although class is Cloneable");
         }
@@ -149,6 +198,6 @@ public abstract class GameContext<B extends IBoard>
         WIN,
         LOSE,
         DRAW,
-        NOT_YET_FINISH
+        RUNNING
     }
 }
