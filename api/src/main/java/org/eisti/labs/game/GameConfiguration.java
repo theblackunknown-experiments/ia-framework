@@ -2,7 +2,7 @@
  * #%L
  * API Interface Project
  * %%
- * Copyright (C) 2011 L@ris's Labs
+ * Copyright (C) 2011 MACHIZAUD Andréa
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -22,24 +22,13 @@
 package org.eisti.labs.game;
 
 /**
- * Tag interface for Pawn
- *
- * @deprecated
  * @author MACHIZAUD Andréa
- * @version 17/06/11
+ * @version 7/3/11
  */
-public interface IPawn {
+public interface GameConfiguration {
+    public String provideBoardClazz();
 
-    /**
-     * Pawn's name
-     */
-    public String getName();
+    public String provideRulesClazz();
 
-    /**
-     * Hexadecimal representation
-     */
-    public int getIdentifier();
-
-    public IPlayer getOwner();
-
+    public String provideContextClazz();
 }

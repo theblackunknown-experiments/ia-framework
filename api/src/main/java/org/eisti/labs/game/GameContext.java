@@ -37,11 +37,11 @@ public abstract class GameContext<B extends IBoard, C extends GameContext>
     /**
      * Player currently playing
      */
-    private Tuple<IPlayer, Duration>[] players;
+    private Tuple<IPlayer, Clock>[] players;
     /**
      * Time remaining before the game ends
      */
-    private Duration elapsedTime;
+    private Clock elapsedTime;
     /**
      * Board history
      */
@@ -53,10 +53,10 @@ public abstract class GameContext<B extends IBoard, C extends GameContext>
      * <b>History is ordered from recent to elder</b>
      */
     public GameContext(
-            Duration elapsedTime,
+            Clock elapsedTime,
             B[] history,
             IPlayer[] playersInGame,
-            Duration[] playersRemainingTime) {
+            Clock[] playersRemainingTime) {
         this.elapsedTime = elapsedTime;
         this.players = zip(playersInGame, playersRemainingTime);
         this.history = history;
@@ -68,15 +68,15 @@ public abstract class GameContext<B extends IBoard, C extends GameContext>
     protected GameContext() {
     }
 
-    public Tuple<IPlayer, Duration> getActivePlayer() {
+    public Tuple<IPlayer, Clock> getActivePlayer() {
         return players[0];
     }
 
-    public Tuple<IPlayer, Duration>[] getPlayers() {
+    public Tuple<IPlayer, Clock>[] getPlayers() {
         return players;
     }
 
-    public Duration getElapsedTime() {
+    public Clock getElapsedTime() {
         return elapsedTime;
     }
 
@@ -109,7 +109,7 @@ public abstract class GameContext<B extends IBoard, C extends GameContext>
         C alike = buildEmptyContext();
 
         //pass remaining time reference
-        alike.elapsedTime = elapsedTime; //FIXME Reference sharing ?
+        alike.elapsedTime = elapsedTime;
 
         //update board history
         IBoard[] previousHistory = getHistory();
@@ -121,7 +121,7 @@ public abstract class GameContext<B extends IBoard, C extends GameContext>
                 previousHistory.length);
 
         //roll player turn
-        Tuple<IPlayer, Duration>[] allPlayers = getPlayers();
+        Tuple<IPlayer, Clock>[] allPlayers = getPlayers();
         alike.players = new Tuple[allPlayers.length];
         System.arraycopy(
                 allPlayers, 1,
@@ -140,7 +140,7 @@ public abstract class GameContext<B extends IBoard, C extends GameContext>
         C alike = buildEmptyContext();
 
         //pass remaining time reference
-        alike.elapsedTime = elapsedTime; //FIXME Reference sharing ?
+        alike.elapsedTime = elapsedTime;
 
         //update board history
         IBoard[] previousHistory = getHistory();
@@ -151,7 +151,7 @@ public abstract class GameContext<B extends IBoard, C extends GameContext>
                 previousHistory.length);
 
         //roll player turn
-        Tuple<IPlayer, Duration>[] allPlayers = getPlayers();
+        Tuple<IPlayer, Clock>[] allPlayers = getPlayers();
         int newPlayerIdx = -1;
 
         for (int i = allPlayers.length; i-- > 0; )

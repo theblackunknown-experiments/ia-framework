@@ -1,4 +1,27 @@
+/*
+ * #%L
+ * API Interface Project
+ * %%
+ * Copyright (C) 2011 MACHIZAUD Andréa
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public 
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
+ * #L%
+ */
 package org.eisti.labs.game;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Duration container to represent remaining time
@@ -7,18 +30,27 @@ package org.eisti.labs.game;
  * @version 7/3/11
  */
 public class Clock {
-    private long remainingTime;
+    private long time;
 
-    public Clock(long remainingTime) {
-        this.remainingTime = remainingTime;
+    public Clock(long time) {
+        this(time, TimeUnit.MILLISECONDS);
     }
 
-    public long getRemainingTime() {
-        return remainingTime;
+    public Clock(long time, TimeUnit unit) {
+        this.time = unit.toMillis(time);
     }
 
-    public void setRemainingTime(long remainingTime) {
-        this.remainingTime = remainingTime;
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    @Override
+    public String toString() {
+        return Double.toString(time / 1000.0) + "s";
     }
 
     @Override
@@ -28,12 +60,12 @@ public class Clock {
 
         Clock clock = (Clock) o;
 
-        return remainingTime == clock.remainingTime;
+        return time == clock.time;
 
     }
 
     @Override
     public int hashCode() {
-        return (int) (remainingTime ^ (remainingTime >>> 32));
+        return (int) (time ^ (time >>> 32));
     }
 }

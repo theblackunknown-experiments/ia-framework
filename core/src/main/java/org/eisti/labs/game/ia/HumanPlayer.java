@@ -23,6 +23,7 @@ package org.eisti.labs.game.ia;
 
 import org.eisti.labs.game.AbstractPlayer;
 import org.eisti.labs.game.GameContext;
+import org.eisti.labs.game.IRules;
 import org.eisti.labs.game.Ply;
 
 import java.util.Scanner;
@@ -32,7 +33,7 @@ import java.util.regex.Pattern;
  * @author MACHIZAUD Andréa
  * @version 27/06/11
  */
-public class HumanPlayer
+public final class HumanPlayer
         extends AbstractPlayer {
 
     //FIXME Limited to 9 rows  and 26 columns
@@ -44,8 +45,11 @@ public class HumanPlayer
 
     //TODO Handle time spent here ? Or separate thread ?
     @Override
-    public Ply play(GameContext context) {
+    public Ply play(GameContext context, IRules rules) {
+        System.out.println("Current game time : " + context.getElapsedTime());
+        System.out.println("Your remaining time : " + context.getActivePlayer().getSecond());
         System.out.println("Current board is :\n" + context.getBoard());
+
         String[] coordinates;
         System.out.println("Your turn Player#" + getIdentifier());
         do {
@@ -86,5 +90,10 @@ public class HumanPlayer
                 }
             return true;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "HumanPlayer#" + Long.toHexString(super.getIdentifier());
     }
 }

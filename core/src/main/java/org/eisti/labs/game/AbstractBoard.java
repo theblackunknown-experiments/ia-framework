@@ -62,7 +62,6 @@ abstract public class AbstractBoard
 
 
         //FIXME width or height > 26
-
         COLUMN_LABELS = new char[width];
         for (char i = 0; i < width; i++)
             COLUMN_LABELS[i] = (char) ('A' + i);

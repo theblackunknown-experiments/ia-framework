@@ -1,8 +1,29 @@
+/*
+ * #%L
+ * API Interface Project
+ * %%
+ * Copyright (C) 2011 MACHIZAUD Andréa
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public 
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.html>.
+ * #L%
+ */
 package org.eisti.labs.game.workers;
 
 import org.eisti.labs.game.Clock;
-import org.eisti.labs.game.GameEvent;
-import org.eisti.labs.game.workers.interruptions.PlayerTurnEnded;
+
+import static org.eisti.labs.util.Validation.require;
 
 /**
  * Dedicated worker for spending clock's time
@@ -11,10 +32,15 @@ import org.eisti.labs.game.workers.interruptions.PlayerTurnEnded;
  * @version 7/3/11
  */
 public class ClockWorker
-        extends Thread {
+        extends GameWorker {
+
+    private Clock currentClock = null;
+    private Clock gameClock;
+
+    private static final long ONE_SECOND = 1000L;
 
     private ClockWorker() {
-        super(ClockTaskHolder.CLOCK_TASK, "Clock Worker");
+        super("Clock Worker");
     }
 
     private static class ClockWorkerHolder {
@@ -26,61 +52,59 @@ public class ClockWorker
         return ClockWorkerHolder.instance;
     }
 
-    /**
-     * Core task
-     */
-    private enum ClockTaskHolder
-            implements Runnable {
-        CLOCK_TASK;
+    public void setGameClock(Clock gameClock) {
+        this.gameClock = gameClock;
+    }
 
-        private GameEvent interruptionStatus = null;
-        private boolean off = false;
-        private Clock currentClock = null;
+    public void setPlayerClock(Clock playerClock) {
+        this.currentClock = playerClock;
+    }
 
-        public boolean isOff() {
-            return off;
-        }
+    @Override
+    boolean ready() {
+        return gameClock != null;
+    }
 
-        public void setOff(boolean off) {
-            this.off = off;
-        }
+    @Override
+    public void task() {
+        while (!isOff()) {
+            try {
+                safeWait();
 
-        public Clock getCurrentClock() {
-            return currentClock;
-        }
+                require(gameClock != null,
+                        "Clock not set after referee notification");
+                require(currentClock != null,
+                        "Clock not set after referee notification");
 
-        public void setCurrentClock(Clock currentClock) {
-            this.currentClock = currentClock;
-        }
+                //Time goes on...
+                while (currentClock.getTime() > 0) {
+                    currentClock.setTime(
+                            currentClock.getTime() - ONE_SECOND);
+                    gameClock.setTime(
+                            gameClock.getTime() + ONE_SECOND);
+                    sleep(ONE_SECOND);
+                    if (Thread.interrupted())
+                        throw new InterruptedException();
+//                    System.err.println("Game's time : " + gameClock);
+//                    System.err.println("Player's remaining time : " + currentClock);
+                }
 
-        @Override
-        public void run() {
-            while (!isOff()) {
-                try {
-                    //No clock is assigned to this thread
-                    if (currentClock == null)
-                        wait();
+                //time's depletion
+                RefereeWorker.getInstance().interrupt(GameEvent.NO_MORE_TIME);
 
-                    //Empty given clock every seconds
-                    //TODO Adjust time update
-                    while (currentClock.getRemainingTime() > 0) {
-                        currentClock.setRemainingTime(
-                                currentClock.getRemainingTime() - 1000);
-                        sleep(1000);
-                    }
-
-                    //jump out of while condition : no more time remaining
-                    RefereeWorker.getInstance().setGameEvent(GameEvent.NO_MORE_TIME);
-                    RefereeWorker.getInstance().interrupt();
-
-                } catch (InterruptedException e) {
-                    switch (interruptionStatus) {
-                        case PLAYER_TURN_ENDED:
-                            currentClock = null;//remove current clock
-                            break;
-                        default:
-                            e.printStackTrace();
-                    }
+            } catch (InterruptedException e) {
+                System.out.println(getName() + " interrupted " + getInterruptionStatus());
+                switch (getInterruptionStatus()) {
+                    case PLAYER_PLY_ENTERED:
+                        //do nothing, just stop spending time
+                        break;
+                    case GAME_END:
+                        setOff(true);
+                        break;
+                    default:
+                        System.err.println("Unexpected error status when waiting for user input : "
+                                + getInterruptionStatus());
+                        e.printStackTrace();
                 }
             }
         }

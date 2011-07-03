@@ -42,6 +42,6 @@ public interface IPlayer {
     /**
      * Pawn movement from a player
      */
-    public Ply play(GameContext context);
+    public Ply play(GameContext context, IRules rules);
 
 }

@@ -30,9 +30,6 @@ package org.eisti.labs.game;
 public abstract class AbstractPlayer
         implements IPlayer {
 
-    private static final java.util.logging.Logger logger =
-            java.util.logging.Logger.getLogger(AbstractPlayer.class.getCanonicalName());
-
     /**
      * ID
      */

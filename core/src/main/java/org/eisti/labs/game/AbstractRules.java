@@ -27,8 +27,8 @@ import static org.eisti.labs.util.Validation.require;
  * @author MACHIZAUD Andréa
  * @version 6/20/11
  */
-abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B, C>>
-        implements IReferee<B, C> {
+abstract public class AbstractRules<B extends IBoard, C extends GameContext<B, C>>
+        implements IRules<B, C> {
 
     private int playerMask;
     private int pawnMask;
@@ -36,7 +36,7 @@ abstract public class AbstractReferee<B extends IBoard, C extends GameContext<B,
     private int playerBitCursor;
     private int pawnBitCursor;
 
-    protected AbstractReferee() {
+    protected AbstractRules() {
         /*
          * a pawn ID contains information about
          *  - which player owns that pawn
