@@ -53,6 +53,13 @@ public final class RandomBot
     public Ply play(GameContext context, IRules rules) {
         Ply[] legalMoves = (Ply[]) rules.getLegalMoves(context)
                 .toArray(new Ply[0]);
-        return legalMoves[random.nextInt(legalMoves.length)];
+        return legalMoves.length > 0
+                ? legalMoves[random.nextInt(legalMoves.length)]
+                : Ply.PASS;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "#" + Integer.toHexString(getIdentifier());
     }
 }

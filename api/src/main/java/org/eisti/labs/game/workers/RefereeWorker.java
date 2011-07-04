@@ -27,7 +27,6 @@ import org.eisti.labs.util.Tuple;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,6 +40,10 @@ import static org.eisti.labs.util.Validation.require;
  */
 public class RefereeWorker
         extends GameWorker {
+
+    private static final String HINTS_MODE = "hint";
+    private static final String BOARD_MODE = "board";
+    private static final String PLAYER_MODE = "player";
 
     private GameContext context;
     private IRules rules;
@@ -67,7 +70,7 @@ public class RefereeWorker
     }
 
     private static void printHints(OutputStream out, Set<Ply> plies) {
-        if (System.getProperty("hints") != null) {
+        if (System.getProperty(HINTS_MODE) != null) {
             if (out instanceof PrintStream)
                 ((PrintStream) out).println(plies);
             else
@@ -79,13 +82,34 @@ public class RefereeWorker
         }
     }
 
-    private static void printHints(Writer out, Set<Ply> plies) {
-        if (System.getProperty("hints") != null) {
-            try {
-                out.write(plies + "\n");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    private static void printBoard(OutputStream out, IBoard board) {
+        if (System.getProperty(BOARD_MODE) != null) {
+            if (out instanceof PrintStream)
+                ((PrintStream) out).println(board);
+            else
+                try {
+                    out.write(board.toString().getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+    }
+
+    private static void printPlayerTurn(OutputStream out, Tuple<IPlayer, Clock> player) {
+        if (System.getProperty(PLAYER_MODE) != null) {
+            String data = String.format(
+                    "%s's turn. Remaining time %.2fs",
+                    player.getFirst(),
+                    player.getSecond().getTime() / 1000.0
+            );
+            if (out instanceof PrintStream)
+                ((PrintStream) out).println(data);
+            else
+                try {
+                    out.write(data.getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
     }
 
@@ -133,25 +157,26 @@ public class RefereeWorker
                 try {
                     //little help
                     printHints(System.out, allowedPlies);
+                    printBoard(System.out, context.getBoard());
+                    printPlayerTurn(System.out, currentPlayer);
 
-                    //wake up clock task
-                    clockWorker.process();
                     //wake up player task
                     playerWorker.process();
+                    //wake up clock task
+                    clockWorker.process();
 
                     //wait for GameEvent : either ply entered or time run out
                     safeWait();
 
                 } //referee is woke up by an interruption
                 catch (InterruptedException e) {
-                    System.out.println(getName() + " interrupted " + getInterruptionStatus());
                     switch (getInterruptionStatus()) {
                         //player ply entered, check for validity
                         case PLAYER_PLY_ENTERED:
                             //checking
                             enteredPly = playerWorker.getLastPly();
                             require(enteredPly != null, "Error at player's ply registration");
-                            plyAccepted = allowedPlies.contains(enteredPly);
+                            plyAccepted = enteredPly == Ply.PASS || allowedPlies.contains(enteredPly);
                             if (!plyAccepted)
                                 System.err.println(enteredPly + " is not a valid move for this board");
                             else
@@ -162,10 +187,6 @@ public class RefereeWorker
                         case NO_MORE_TIME:
                             //immediately stop player
                             playerWorker.interrupt(GameEvent.NO_MORE_TIME);
-                            System.out.println(String.format(
-                                    "%s lose due to lack of time !",
-                                    currentPlayer.getFirst()
-                            ));
                             break gameloop;
                         //fallback case
                         default:
@@ -183,25 +204,32 @@ public class RefereeWorker
             context = rules.doPly(context, enteredPly);
         }
 
-        //shutdown workers
-        clockWorker.interrupt(GameEvent.GAME_END);
-        playerWorker.interrupt(GameEvent.GAME_END);
+        currentPlayer = context.getActivePlayer();
 
-        //check if game should goes on
-        switch (context.getState()) {
-            case WIN:
-                System.out.println(String.format(
-                        "%s won !",
-                        context.getActivePlayer().getFirst()));
-                break;
-            case DRAW:
-                System.out.println("Draw Game !");
-                break;
-            case LOSE:
-                System.out.println(String.format(
-                        "%s lose !",
-                        context.getActivePlayer().getFirst()));
-                break;
+        //rules victory
+        if (currentPlayer.getSecond().getTime() > 0) {
+            switch (context.getState()) {
+                case WIN:
+                    System.out.println(String.format(
+                            "%s won !",
+                            currentPlayer.getFirst()
+                    ));
+                    break;
+                case DRAW:
+                    System.out.println("Draw Game !");
+                    break;
+                case LOSE:
+                    System.out.println(String.format(
+                            "%s lose !",
+                            currentPlayer.getFirst()));
+                    break;
+            }
+        }//time's depletion victory
+        else {
+            System.out.println(String.format(
+                    "%s lose due to lack of time !",
+                    currentPlayer.getFirst()
+            ));
         }
         //some time statistics
         System.out.println("Game finished in " + context.getElapsedTime());

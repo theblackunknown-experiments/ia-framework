@@ -46,13 +46,11 @@ public final class HumanPlayer
     //TODO Handle time spent here ? Or separate thread ?
     @Override
     public Ply play(GameContext context, IRules rules) {
-        System.out.println("Current game time : " + context.getElapsedTime());
-        System.out.println("Your remaining time : " + context.getActivePlayer().getSecond());
-        System.out.println("Current board is :\n" + context.getBoard());
 
         String[] coordinates;
-        System.out.println("Your turn Player#" + getIdentifier());
         do {
+            System.out.println("Current game time : " + context.getElapsedTime());
+            System.out.println("Your remaining time : " + context.getActivePlayer().getSecond());
             System.out.print("Where do you want to play ? ");
             String input = inputReader.nextLine();
             coordinates = input.split("[,]");

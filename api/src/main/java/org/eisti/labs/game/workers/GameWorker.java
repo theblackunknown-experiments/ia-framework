@@ -90,7 +90,7 @@ abstract public class GameWorker
 
     abstract public void task();
 
-    protected enum GameEvent {
+    public enum GameEvent {
         PLAYER_PLY_ENTERED,
         NO_MORE_TIME,
         GAME_END

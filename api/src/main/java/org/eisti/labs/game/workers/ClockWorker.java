@@ -78,6 +78,8 @@ public class ClockWorker
 
                 //Time goes on...
                 while (currentClock.getTime() > 0) {
+//                    System.err.println("Game's time : " + gameClock);
+//                    System.err.println("Player's remaining time : " + currentClock);
                     currentClock.setTime(
                             currentClock.getTime() - ONE_SECOND);
                     gameClock.setTime(
@@ -85,15 +87,12 @@ public class ClockWorker
                     sleep(ONE_SECOND);
                     if (Thread.interrupted())
                         throw new InterruptedException();
-//                    System.err.println("Game's time : " + gameClock);
-//                    System.err.println("Player's remaining time : " + currentClock);
                 }
 
                 //time's depletion
                 RefereeWorker.getInstance().interrupt(GameEvent.NO_MORE_TIME);
 
             } catch (InterruptedException e) {
-                System.out.println(getName() + " interrupted " + getInterruptionStatus());
                 switch (getInterruptionStatus()) {
                     case PLAYER_PLY_ENTERED:
                         //do nothing, just stop spending time

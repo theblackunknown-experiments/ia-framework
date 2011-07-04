@@ -97,7 +97,6 @@ public class PlayerWorker
                 RefereeWorker.getInstance().interrupt(GameEvent.PLAYER_PLY_ENTERED);
 
             } catch (InterruptedException e) {
-                System.out.println(getName() + " interrupted " + getInterruptionStatus());
                 switch (getInterruptionStatus()) {
                     case NO_MORE_TIME://you just lose the game
                     case GAME_END://Game ended : soft end

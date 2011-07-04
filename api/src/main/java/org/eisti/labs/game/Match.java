@@ -21,6 +21,8 @@
  */
 package org.eisti.labs.game;
 
+import org.eisti.labs.game.workers.ClockWorker;
+import org.eisti.labs.game.workers.PlayerWorker;
 import org.eisti.labs.game.workers.RefereeWorker;
 import org.eisti.labs.util.Validation;
 
@@ -29,6 +31,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
+import static org.eisti.labs.game.workers.GameWorker.GameEvent.GAME_END;
 import static org.eisti.labs.util.Validation.require;
 
 /**
@@ -41,7 +44,7 @@ public final class Match
         implements GameProperties {
 
     public static void main(String[] args)
-            throws GameException {
+            throws GameException, InterruptedException {
         if (args.length == 1
                 && (args[0].equals("-h") || args[0].equals("--help"))) {
             System.out.println(USAGE);
@@ -182,6 +185,8 @@ public final class Match
 
             //at last, we can play...
             run(rules, gameContext);
+
+            configuration.shutdownHook();
         } catch (Validation.UnsatisfiedCheck e) {
             throw new GameException(e.getLocalizedMessage(), e);
         } catch (NumberFormatException e) {
@@ -214,13 +219,12 @@ public final class Match
 
     private static void run(
             final IRules rules,
-            final GameContext initialContext) {
+            final GameContext initialContext) throws InterruptedException {
         require(initialContext.getState() == GameContext.GameState.RUNNING,
                 "Game is already finish although nobody has played yet");
 
         //set up referee
         RefereeWorker referee = RefereeWorker.getInstance();
-
 
         referee.setContext(initialContext);
         referee.setRules(rules);
@@ -228,7 +232,16 @@ public final class Match
         //start game
         referee.process();
 
+        RefereeWorker.getInstance().join();
 
+        //shutdown workers
+        ClockWorker.getInstance().interrupt(GAME_END);
+        ClockWorker.getInstance().join();
+        PlayerWorker.getInstance().interrupt(GAME_END);
+        //ensure player worker really receive drug pill
+        Thread.sleep(100);
+        PlayerWorker.getInstance().interrupt(GAME_END);
+        PlayerWorker.getInstance().join();
     }
 }
 

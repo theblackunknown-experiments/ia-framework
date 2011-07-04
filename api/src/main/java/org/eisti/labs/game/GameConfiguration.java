@@ -31,4 +31,6 @@ public interface GameConfiguration {
     public String provideRulesClazz();
 
     public String provideContextClazz();
+
+    public void shutdownHook();
 }
