@@ -59,6 +59,9 @@ public final class RandomBot
     }
 
     @Override
+    public void IOShutdownHook() { }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName() + "#" + Integer.toHexString(getIdentifier());
     }

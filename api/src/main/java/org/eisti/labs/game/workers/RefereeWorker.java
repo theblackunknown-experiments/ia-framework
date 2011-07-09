@@ -208,6 +208,7 @@ public class RefereeWorker
 
         //rules victory
         if (currentPlayer.getSecond().getTime() > 0) {
+            printBoard(System.out, context.getBoard());
             switch (context.getState()) {
                 case WIN:
                     System.out.println(String.format(

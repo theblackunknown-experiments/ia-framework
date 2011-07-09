@@ -26,6 +26,8 @@ import org.eisti.labs.game.IPlayer;
 import org.eisti.labs.game.IRules;
 import org.eisti.labs.game.Ply;
 
+import java.util.concurrent.*;
+
 import static org.eisti.labs.util.Validation.require;
 
 /**
@@ -82,6 +84,10 @@ public class PlayerWorker
 
     @Override
     public void task() {
+        //sub-task runner
+        ExecutorService ex = Executors.newSingleThreadExecutor();
+        //future user's response
+        Future<Ply> userInputReader = null;
         //task loop
         while (!isOff()) {
             try {
@@ -90,16 +96,40 @@ public class PlayerWorker
                 //referee notified us
                 require(player != null, "Player not set after referee notification");
 
-                //let the player play
-                setLastPly(player.play(context, rules));
+                //defers the user's response wait to the sub-task,
+                // but keep a reference to the tas kso we can supervise it
+                userInputReader = ex.submit(new Callable<Ply>() {
+                    @Override
+                    public Ply call() throws Exception {
+                        return player.play(context, rules);
+                    }
+                });
+
+                //wait for the response to be complete, and record it
+                //implicit `wait` here (cf. future)
+                setLastPly(userInputReader.get());
 
                 //notify referee
                 RefereeWorker.getInstance().interrupt(GameEvent.PLAYER_PLY_ENTERED);
 
-            } catch (InterruptedException e) {
+            }//sub-task unexpected error
+            catch (ExecutionException e) {
+                switch (getInterruptionStatus()) {
+                    default:
+                        System.err.println("Unexpected error status when waiting for user input : "
+                                + getInterruptionStatus());
+                        e.printStackTrace();
+                }
+            }//interrupt happened, expected it to be on the future's `wait`
+            catch (InterruptedException e) {
                 switch (getInterruptionStatus()) {
                     case NO_MORE_TIME://you just lose the game
                     case GAME_END://Game ended : soft end
+                        //cancel the user response wait
+                        if (userInputReader != null) userInputReader.cancel(true);
+                        //close the sub-task supervisor
+                        ex.shutdownNow();
+                        //close current thread
                         setOff(true);
                         break;
                     default:

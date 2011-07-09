@@ -242,6 +242,9 @@ public final class Match
         Thread.sleep(100);
         PlayerWorker.getInstance().interrupt(GAME_END);
         PlayerWorker.getInstance().join();
+
+        //Brutal exit because thread waiting on standard input cannot be closed...
+        System.exit(0);
     }
 }
 

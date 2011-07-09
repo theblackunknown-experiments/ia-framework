@@ -44,4 +44,5 @@ public interface IPlayer {
      */
     public Ply play(GameContext context, IRules rules);
 
+    public void IOShutdownHook();
 }

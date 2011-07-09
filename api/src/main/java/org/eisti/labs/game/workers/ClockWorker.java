@@ -37,7 +37,8 @@ public class ClockWorker
     private Clock currentClock = null;
     private Clock gameClock;
 
-    private static final long ONE_SECOND = 1000L;
+    //every 0.01sec
+    private static final long CLOCK_UPDATE_INTERVAL = 10L;
 
     private ClockWorker() {
         super("Clock Worker");
@@ -78,13 +79,13 @@ public class ClockWorker
 
                 //Time goes on...
                 while (currentClock.getTime() > 0) {
-//                    System.err.println("Game's time : " + gameClock);
-//                    System.err.println("Player's remaining time : " + currentClock);
+                    System.err.println("Game's time : " + gameClock);
+                    System.err.println("Player's remaining time : " + currentClock);
                     currentClock.setTime(
-                            currentClock.getTime() - ONE_SECOND);
+                            currentClock.getTime() - CLOCK_UPDATE_INTERVAL);
                     gameClock.setTime(
-                            gameClock.getTime() + ONE_SECOND);
-                    sleep(ONE_SECOND);
+                            gameClock.getTime() + CLOCK_UPDATE_INTERVAL);
+                    sleep(CLOCK_UPDATE_INTERVAL);
                     if (Thread.interrupted())
                         throw new InterruptedException();
                 }
