@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
-import static org.eisti.labs.util.Validation.require;
+import static org.eisti.labs.game.Ply.Coordinate.Coordinate;
 
 /**
  * General template for 2D board game
@@ -35,18 +35,18 @@ import static org.eisti.labs.util.Validation.require;
  * @author MACHIZAUD Andréa
  * @version 17/06/11
  */
-abstract public class AbstractBoard
+abstract public class AbstractBoard<B extends IBoard>
         implements IBoard, Cloneable {
 
     /**
      * Board representation
      */
-    protected final ICase[] board;
+//    protected final ICase[] board;
+    protected final int[] board;
     /**
      * Dimension
      */
     private final Dimension boardDimension;
-
 
     private char[] COLUMN_LABELS;
     private char[] ROW_LABELS;
@@ -60,7 +60,6 @@ abstract public class AbstractBoard
     protected AbstractBoard(int width, int height) {
         boardDimension = new Dimension(width, height);
 
-
         //FIXME width or height > 26
         COLUMN_LABELS = new char[width];
         for (char i = 0; i < width; i++)
@@ -70,122 +69,183 @@ abstract public class AbstractBoard
         for (char i = 0; i < height; i++)
             ROW_LABELS[i] = (char) ('1' + i);
 
-        board = new ICase[width * height];
+        final int boardSize = width * height;
+        board = new int[boardSize];
 
-        for (int i = height; i-- > 0; )
-            for (int j = width; j-- > 0; )
-                board[getBoardIndex(i, j)] = new Case(i, j);
+        for (int i = boardSize; i-- > 0; )
+            board[i] = NO_PAWN;
         initializeBoard();
-        require(boardInitialized(board),
-                "Some case were not initialized");
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
-    public Dimension getDimension() {
+    public final Dimension getDimension() {
         return boardDimension;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
-    public int getPawnID(int row, int column) {
-        return getCase(row, column).getPawnID();
-    }
-
-    public int getPawnID(Ply.Coordinate coord) {
-        require(coord != null, "Invalid argument coord : null");
-        return getPawnID(coord.getRow(), coord.getColumn());
-    }
-
-    public final boolean isAt(Ply.Coordinate coord, int pawnID) {
-        return getPawnID(coord) == pawnID;
-    }
-
     @Override
-    public ICase getCase(int row, int column) {
-        if (!(0 <= row && row < getDimension().getHeight()))
-            throw new ArrayIndexOutOfBoundsException("Out of bound row : " + row);
-        if (!(0 <= column && column < getDimension().getWidth()))
-            throw new ArrayIndexOutOfBoundsException("Out of bound column : " + column);
-        return board[getBoardIndex(row, column)];
+    public final char getFirstRowLabel() {
+        return ROW_LABELS[0];
     }
 
-    private int getBoardIndex(int row, int column) {
-        return row * (int) (getDimension().getHeight()) + column;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final char getLastRowLabel() {
+        return ROW_LABELS[ROW_LABELS.length - 1];
     }
 
-    public ICase[] getCaseAround(ICase center) {
-        Collection<ICase> neighborhood = new ArrayList<ICase>(4);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final char getFirstColumnLabel() {
+        return COLUMN_LABELS[0];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final char getLastColumnLabel() {
+        return COLUMN_LABELS[COLUMN_LABELS.length - 1];
+    }
+
+    /**
+     * Internal utility function which translates characters coordinate to internal board's corresponding index
+     *
+     * @param column - column label
+     * @param row    - row label
+     * @return corresponding internal board's index
+     */
+    private int translate(final char column, final char row) {
+        final int columnInteger = column - getFirstColumnLabel();
+        final int rowInteger = row - getFirstRowLabel();
+        return rowInteger * getDimension().height + columnInteger;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int getPawn(char column, char row) {
+        final int boardIndex = translate(column, row);
+        return board[boardIndex];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final int getPawn(Ply.Coordinate coordinate) {
+        return getPawn(coordinate.getColumn(), coordinate.getRow());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final void setPawn(char column, char row, int pawnID) {
+        board[translate(column, row)] = pawnID;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final void setPawn(Ply.Coordinate coordinate, int pawnID) {
+        setPawn(coordinate.getColumn(), coordinate.getRow(), pawnID);
+    }
+
+    /**
+     * Check if expected pawn is at given position
+     *
+     * @param coordinate - position checked
+     * @param pawnID     - expected pawn
+     * @return whether expected pawn is at given location or not
+     */
+    public final boolean isAt(Ply.Coordinate coordinate, int pawnID) {
+        return getPawn(coordinate) == pawnID;
+    }
+
+    /**
+     * Check if expected pawn is at given position
+     *
+     * @param column - position's column checked
+     * @param row    - position's row checked
+     * @param pawnID - expected pawn
+     * @return whether expected pawn is at given location or not
+     */
+    public final boolean isAt(char column, char row, int pawnID) {
+        return getPawn(column, row) == pawnID;
+    }
+
+    public final Ply.Coordinate[] getCaseAround(Ply.Coordinate center) {
+        Collection<Ply.Coordinate> neighborhood = new ArrayList<Ply.Coordinate>(4);
 
         //vertical neighbor
-        switch (center.getPosition().getRow()) {
-            case 0: // first row
-                neighborhood.add(
-                        getCase(
-                                center.getPosition().getRow() + 1,
-                                center.getPosition().getColumn()));
-                break;
-            case 7: //last row
-                neighborhood.add(
-                        getCase(
-                                center.getPosition().getRow() - 1,
-                                center.getPosition().getColumn()));
-                break;
-            default: //otherwise
-                neighborhood.add(
-                        getCase(
-                                center.getPosition().getRow() + 1,
-                                center.getPosition().getColumn()));
-                neighborhood.add(
-                        getCase(
-                                center.getPosition().getRow() - 1,
-                                center.getPosition().getColumn()));
-
+        char centerRow = center.getRow();
+        if (centerRow == getFirstRowLabel()) {
+            neighborhood.add(
+                    Coordinate(
+                            (char) (center.getRow() + 1),
+                            (char) center.getColumn()));
+        } else if (centerRow == getLastRowLabel()) {
+            neighborhood.add(
+                    Coordinate(
+                            (char) (center.getRow() - 1),
+                            (char) center.getColumn()));
+        } else {
+            neighborhood.add(
+                    Coordinate(
+                            (char) (center.getRow() + 1),
+                            (char) center.getColumn()));
+            neighborhood.add(
+                    Coordinate(
+                            (char) (center.getRow() - 1),
+                            (char) center.getColumn()));
         }
 
-        //horizontal neighbor
-        switch (center.getPosition().getColumn()) {
-            case 0: // first column
-                neighborhood.add(
-                        getCase(
-                                center.getPosition().getRow(),
-                                center.getPosition().getColumn() + 1));
-                break;
-            case 7: // last column
-                neighborhood.add(
-                        getCase(
-                                center.getPosition().getRow(),
-                                center.getPosition().getColumn() - 1));
-                break;
-            default: //otherwise
-                neighborhood.add(
-                        getCase(
-                                center.getPosition().getRow(),
-                                center.getPosition().getColumn() + 1));
-                neighborhood.add(
-                        getCase(
-                                center.getPosition().getRow(),
-                                center.getPosition().getColumn() - 1));
-
+        char centerColumn = center.getColumn();
+        if (centerColumn == getFirstColumnLabel()) {
+            neighborhood.add(
+                    Coordinate(
+                            (char) center.getRow(),
+                            (char) (center.getColumn() + 1)));
+        } else if (centerColumn == getLastColumnLabel()) {
+            neighborhood.add(
+                    Coordinate(
+                            (char) center.getRow(),
+                            (char) (center.getColumn() - 1)));
+        } else {
+            neighborhood.add(
+                    Coordinate(
+                            (char) center.getRow(),
+                            (char) (center.getColumn() + 1)));
+            neighborhood.add(
+                    Coordinate(
+                            (char) center.getRow(),
+                            (char) (center.getColumn() - 1)));
         }
 
-        ICase[] result = new ICase[neighborhood.size()];
-        neighborhood.toArray(result);
-        return result;
+        return neighborhood
+                .toArray(new Ply.Coordinate[neighborhood.size()]);
     }
 
-    public final ICase[] getFreeCaseAround(ICase center) {
-        Collection<ICase> emptyNeighborhood = new ArrayList<ICase>(4);
-        for (ICase neighbor : getCaseAround(center))
-            if (neighbor.getPawnID() == ICase.NO_PAWN)
+    public final Ply.Coordinate[] getFreeCaseAround(Ply.Coordinate center) {
+        Collection<Ply.Coordinate> emptyNeighborhood = new ArrayList<Ply.Coordinate>(4);
+        for (Ply.Coordinate neighbor : getCaseAround(center))
+            if (isAt(neighbor, NO_PAWN))
                 emptyNeighborhood.add(neighbor);
 
-        ICase[] result = new ICase[emptyNeighborhood.size()];
-        emptyNeighborhood.toArray(result);
-        return result;
+        return emptyNeighborhood
+                .toArray(new Ply.Coordinate[emptyNeighborhood.size()]);
     }
 
     /**
@@ -193,37 +253,38 @@ abstract public class AbstractBoard
      */
     abstract protected void initializeBoard();
 
-
     @Override
-    public Iterator<ICase> iterator() {
-        return Arrays.asList(board).iterator();
+    public final Iterator<Ply.Coordinate> iterator() {
+        Collection<Ply.Coordinate> coordinates =
+                new ArrayList<Ply.Coordinate>(getDimension().width + getDimension().height);
+        for (char columnLabel : COLUMN_LABELS)
+            for (char rowLabel : ROW_LABELS)
+                coordinates.add(Coordinate(columnLabel, rowLabel));
+        return coordinates.iterator();
     }
 
     @Override
-    public int hashCode() {
-        return Arrays.deepHashCode(board);
+    public final int hashCode() {
+        return Arrays.hashCode(board);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public AbstractBoard clone() {
+    public final B clone() {
         try {
-            return (AbstractBoard) super.clone();
+            return (B) super.clone();
         } catch (CloneNotSupportedException ex) {
             throw new Error("Clone exception although class is cloneable");
         }
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuilder sb = new StringBuilder();
 
-        int width = getDimension().width;
-        int height = getDimension().height;
+        int gridSize = getDimension().width * 2 + 1;
 
-        int gridSize = width * 2 + 1;
-
-        String separatorLine = null;
+        String separatorLine;
         {
             StringBuilder separatorBuilder = new StringBuilder(gridSize + 2);
             separatorBuilder.append('\n');
@@ -235,19 +296,19 @@ abstract public class AbstractBoard
         }
 
         sb.append(' ');
-        for (int columnCursor = 0; columnCursor < width; columnCursor++) {
+        for (char columnCursor : COLUMN_LABELS) {
             sb.append(' ')
-                    .append(COLUMN_LABELS[columnCursor]);
+                    .append(columnCursor);
         }
 
         //header
         sb.append(separatorLine);
-        for (int lineCursor = 0; lineCursor < height; lineCursor++) {
+        for (char rowCursor : ROW_LABELS) {
             //line - pawn
-            sb.append(ROW_LABELS[lineCursor])
+            sb.append(rowCursor)
                     .append('|');
-            for (int columnCursor = 0; columnCursor < width; columnCursor++) {
-                sb.append(getCase(lineCursor, columnCursor).getPawnID())
+            for (char columnCursor : COLUMN_LABELS) {
+                sb.append(getPawn(columnCursor,rowCursor))
                         .append('|');
             }
             //line - separator
@@ -258,70 +319,8 @@ abstract public class AbstractBoard
     }
 
     @Override
-    public boolean equals(Object that) {
+    public final boolean equals(Object that) {
         return that instanceof AbstractBoard
                 && that.hashCode() == this.hashCode();
-    }
-
-    /**
-     * Internal representation of game's case
-     */
-    private class Case implements ICase {
-
-        /**
-         * Case coordinate
-         */
-        private Ply.Coordinate position;
-
-        /**
-         * Pawn on this case if any
-         */
-        private int occupantID;
-
-        protected Case(int row, int column) {
-            require(0 <= row && row < getDimension().getWidth(), "row index is out of board");
-            require(0 <= column && column < getDimension().getHeight(), "column index is out of board");
-            this.position = new Ply.Coordinate(
-                    (char) (column + 'A'),
-                    (char) (row + '1')
-            );
-        }
-
-        public void setPawnID(int occupantID) {
-            this.occupantID = occupantID;
-        }
-
-        @Override
-        public int getPawnID() {
-            return occupantID;
-        }
-
-        @Override
-        public Ply.Coordinate getPosition() {
-            return position;
-        }
-
-        @Override
-        public int hashCode() {
-            return occupantID == NO_PAWN
-                    ? 0
-                    : 41 * (
-                    occupantID
-            ) + position.hashCode();
-        }
-    }
-
-    /*=========================================================================
-                                STATIC PART
-      =========================================================================*/
-
-    /**
-     * Check if every case have been initialize
-     */
-    private static boolean boardInitialized(ICase[] board) {
-        for (ICase area : board)
-            if (area == null)
-                return false;
-        return true;
     }
 }

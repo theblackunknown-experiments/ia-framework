@@ -28,6 +28,7 @@ import org.eisti.labs.game.Ply;
 import org.eisti.labs.ia.IBot;
 
 import java.util.Random;
+import java.util.Set;
 
 /**
  * @author MACHIZAUD Andréa
@@ -50,16 +51,13 @@ public final class RandomBot
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Ply play(GameContext context, IRules rules) {
-        Ply[] legalMoves = (Ply[]) rules.getLegalMoves(context)
-                .toArray(new Ply[0]);
+    public final Ply play(GameContext context, IRules rules) {
+        final Set<Ply> legalMovesSet = rules.getLegalMoves(context);
+        final Ply[] legalMoves = legalMovesSet.toArray(new Ply[legalMovesSet.size()]);
         return legalMoves.length > 0
                 ? legalMoves[random.nextInt(legalMoves.length)]
                 : Ply.PASS;
     }
-
-    @Override
-    public void IOShutdownHook() { }
 
     @Override
     public String toString() {

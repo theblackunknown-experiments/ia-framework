@@ -43,6 +43,4 @@ public interface IPlayer {
      * Pawn movement from a player
      */
     public Ply play(GameContext context, IRules rules);
-
-    public void IOShutdownHook();
 }

@@ -31,8 +31,11 @@ import static org.eisti.labs.util.Validation.require;
  * @author MACHIZAUD Andréa
  * @version 17/06/11
  */
-public class Ply {
+public final class Ply {
 
+    /**
+     * Unique representation of a pass ply, i.e a player's turn when no move is played
+     */
     public static final Ply PASS = new Ply();
 
     /**
@@ -129,15 +132,15 @@ public class Ply {
         else if (positionRegistry.length == 1)
             return String.format(
                     "Ply(%c,%c)",
-                    (char) ('A' + positionRegistry[0].getColumn()),
-                    (char) ('1' + positionRegistry[0].getRow()));
+                    positionRegistry[0].getColumn(),
+                    positionRegistry[0].getRow());
         else {
             StringBuilder sb = new StringBuilder();
             sb.append("Stroke(");
             for (Coordinate coord : positionRegistry)
                 sb.append('[')
-                        .append((char) ('A' + coord.getColumn()))
-                        .append((char) ('1' + coord.getRow()))
+                        .append(coord.getColumn())
+                        .append(coord.getRow())
                         .append(']');
             sb.append(')');
             return sb.toString();
@@ -147,44 +150,42 @@ public class Ply {
     /**
      * Representation of a coordinate on a board
      */
-    public static class Coordinate {
-        private final int row;
-        private final int column;
+    public static final class Coordinate {
+        private final char column;
+        private final char row;
         private final String representation;
 
-        public static Coordinate Coordinate(char column, char row) {
+        public static Coordinate Coordinate(final char column, final char row) {
             return new Coordinate(column, row);
         }
 
         /**
          * Constructor with chess index based parameters
          */
-        public Coordinate(char column, char row) {
-            require('A' <= column, "column index out of expected range A-???");
-            require('1' <= row, "row index out of expected range 0-???");
-            this.column = column - 'A';
-            this.row = row - '1';
+        public Coordinate(final char column, final char row) {
+            this.column = column;
+            this.row = row;
             this.representation = String.format(
                     "Coordinate(%c,%c)",
                     column,
                     row);
         }
 
-        public int getRow() {
+        public final char getRow() {
             return row;
         }
 
-        public int getColumn() {
+        public final char getColumn() {
             return column;
         }
 
         @Override
-        public String toString() {
+        public final String toString() {
             return representation;
         }
 
         @Override
-        public int hashCode() {
+        public final int hashCode() {
             return 41 * (
                     41 + row
             ) + column;

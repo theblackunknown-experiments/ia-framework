@@ -6,7 +6,7 @@
     <parent>
         <artifactId>ia-framework</artifactId>
         <groupId>org.eisti.labs</groupId>
-        <version>0.5</version>
+        <version>0.6</version>
     </parent>
 
     <artifactId>core</artifactId>
@@ -25,12 +25,12 @@
         <dependency>
             <groupId>org.eisti.labs</groupId>
             <artifactId>api</artifactId>
-            <version>0.5</version>
+            <version>0.6</version>
         </dependency>
         <dependency>
             <groupId>org.eisti.labs</groupId>
             <artifactId>helper</artifactId>
-            <version>0.5</version>
+            <version>0.6</version>
         </dependency>
     </dependencies>
 

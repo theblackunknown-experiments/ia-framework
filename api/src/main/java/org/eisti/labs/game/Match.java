@@ -187,6 +187,9 @@ public final class Match
             run(rules, gameContext);
 
             configuration.shutdownHook();
+
+            //Brutal exit because thread waiting on standard input cannot be closed...
+            System.exit(0);
         } catch (Validation.UnsatisfiedCheck e) {
             throw new GameException(e.getLocalizedMessage(), e);
         } catch (NumberFormatException e) {
@@ -242,9 +245,6 @@ public final class Match
         Thread.sleep(100);
         PlayerWorker.getInstance().interrupt(GAME_END);
         PlayerWorker.getInstance().join();
-
-        //Brutal exit because thread waiting on standard input cannot be closed...
-        System.exit(0);
     }
 }
 

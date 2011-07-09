@@ -77,16 +77,6 @@ public final class HumanPlayer
         }
     }
 
-    @Override
-    public void IOShutdownHook() {
-        try {
-            System.in.close();
-            inputReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private static boolean valid(String[] input) {
         if (input == null) {
             System.err.println("No input");

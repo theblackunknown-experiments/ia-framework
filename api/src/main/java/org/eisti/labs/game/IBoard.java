@@ -30,24 +30,84 @@ import java.awt.*;
  * @version 17/06/11
  */
 public interface IBoard
-    extends Iterable<IBoard.ICase> {
+        extends Iterable<Ply.Coordinate> {
 
-    /** Game's dimension */
+    /**
+     * Unique representation of a case where no pawn is set
+     */
+    public static final int NO_PAWN = 0x0;
+
+    /**
+     * Game's dimension
+     */
     public Dimension getDimension();
-    /** Get the pawn at given position of null if nothing found at that position */
-    public ICase getCase(int row, int column);
-    /** hash method */
+
+    /**
+     * Get the pawn at given position of null if nothing found at that position
+     *
+     * @param column - column label
+     * @param row    - row label
+     * @return pawn at that location
+     */
+    public int getPawn(char column, char row);
+
+    /**
+     * Get the pawn at given position of null if nothing found at that position
+     *
+     * @param coordinate - board's coordinate
+     * @return pawn at that location
+     */
+    public int getPawn(Ply.Coordinate coordinate);
+
+    /**
+     * Set the pawn at given position of null if nothing found at that position
+     *
+     * @param column - column label
+     * @param row    - row label
+     * @param pawnID - pawn to set at given position
+     */
+    public void setPawn(char column, char row, int pawnID);
+
+    /**
+     * Set the pawn at given position of null if nothing found at that position
+     *
+     * @param coordinate - board's coordinate
+     * @param pawnID     - pawn to set at given position
+     */
+    public void setPawn(Ply.Coordinate coordinate, int pawnID);
+
+    /* Helper for iterate over row|columns */
+
+    /**
+     * Get the label of board's first row
+     *
+     * @return label of board's first row
+     */
+    public char getFirstRowLabel();
+
+    /**
+     * Get the label of board's last row
+     *
+     * @return label of board's last row
+     */
+    public char getLastRowLabel();
+
+    /**
+     * Get the label of board's first column
+     *
+     * @return label of board's first column
+     */
+    public char getFirstColumnLabel();
+
+    /**
+     * Get the label of board's last column
+     *
+     * @return label of board's last column
+     */
+    public char getLastColumnLabel();
+
+    /**
+     * hash method
+     */
     public int hashCode();
-
-    public interface ICase {
-
-        public static final int NO_PAWN = 0x0;
-
-        public void setPawnID(int pawnID);
-
-        public int getPawnID();
-
-        public Ply.Coordinate getPosition();
-
-    }
 }
