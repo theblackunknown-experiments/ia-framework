@@ -68,26 +68,26 @@ public abstract class GameContext<B extends IBoard, C extends GameContext>
     protected GameContext() {
     }
 
-    public Tuple<IPlayer, Clock> getActivePlayer() {
+    public final Tuple<IPlayer, Clock> getActivePlayer() {
         return players[0];
     }
 
-    public Tuple<IPlayer, Clock>[] getPlayers() {
+    public final Tuple<IPlayer, Clock>[] getPlayers() {
         return players;
     }
 
-    public Clock getElapsedTime() {
+    public final Clock getElapsedTime() {
         return elapsedTime;
     }
 
-    public B getBoard() {
+    public final B getBoard() {
         return history[0];
     }
 
     /**
      * Historical of all previous that lead to this `Game`
      */
-    public B[] getHistory() {
+    public final B[] getHistory() {
         return history;
     }
 
@@ -105,7 +105,7 @@ public abstract class GameContext<B extends IBoard, C extends GameContext>
     /**
      * Generate derived context from this one
      */
-    public C branchOff(B board) {
+    public final C branchOff(B board) {
         C alike = buildEmptyContext();
 
         //pass remaining time reference
@@ -136,7 +136,7 @@ public abstract class GameContext<B extends IBoard, C extends GameContext>
     /**
      * Allow to keep same perspective but with changing current player, but with player order respected
      */
-    protected C changePerspective(IPlayer newCurrentPlayer) {
+    protected final C changePerspective(IPlayer newCurrentPlayer) {
         C alike = buildEmptyContext();
 
         //pass remaining time reference
@@ -187,7 +187,7 @@ public abstract class GameContext<B extends IBoard, C extends GameContext>
      */
     @Override
     @SuppressWarnings("unchecked")
-    protected C clone() {
+    protected final C clone() {
         try {
             return (C) super.clone();
         } catch (CloneNotSupportedException ex) {

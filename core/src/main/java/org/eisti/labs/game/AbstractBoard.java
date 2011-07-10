@@ -42,7 +42,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * Board representation
      */
 //    protected final ICase[] board;
-    protected final int[] board;
+    private final int[] board;
     /**
      * Dimension
      */

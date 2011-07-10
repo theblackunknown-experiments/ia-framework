@@ -33,7 +33,7 @@ abstract public class AbstractRules<B extends IBoard, C extends GameContext<B, C
     private int playerMask;
     private int pawnMask;
 
-    private int playerBitCursor;
+//    private int playerBitCursor;
     private int pawnBitCursor;
 
     protected AbstractRules() {
@@ -51,7 +51,7 @@ abstract public class AbstractRules<B extends IBoard, C extends GameContext<B, C
                 "Not enough bit of information to represent playerID and pawnType within actual representation");
 
         //try to automatically adjust the number of necessary bits
-        playerBitCursor = 1;
+        int playerBitCursor = 1;
         while (numberOfPlayer > Math.pow(2, playerBitCursor))
             playerBitCursor++;
 
