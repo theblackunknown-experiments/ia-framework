@@ -34,6 +34,8 @@ import static org.eisti.labs.util.Validation.require;
 public final class ClockWorker
         extends GameWorker {
 
+    private static final String CLOCK_MODE = "clock";
+
     private Clock currentClock = null;
     private Clock gameClock;
 
@@ -79,8 +81,10 @@ public final class ClockWorker
 
                 //Time goes on...
                 while (currentClock.getTime() > 0) {
-                    System.err.println("Game's time : " + gameClock);
-                    System.err.println("Player's remaining time : " + currentClock);
+                    if (System.getProperty(CLOCK_MODE) != null) {
+                        System.err.println("Game's time : " + gameClock);
+                        System.err.println("Player's remaining time : " + currentClock);
+                    }
                     currentClock.setTime(
                             currentClock.getTime() - CLOCK_UPDATE_INTERVAL);
                     gameClock.setTime(

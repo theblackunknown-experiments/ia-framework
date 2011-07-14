@@ -199,7 +199,7 @@ abstract public class AbstractBoard<B extends IBoard>
     public final Ply.Coordinate[] getFreeCaseAround(final Ply.Coordinate center) {
         final Ply.Coordinate[] neighborHood = getCaseAround(center);
         final Collection<Ply.Coordinate> emptyNeighborhood = new ArrayList<Ply.Coordinate>(neighborHood.length);
-        for (Ply.Coordinate neighbor : getCaseAround(center))
+        for (Ply.Coordinate neighbor : neighborHood)
             if (isAt(neighbor, NO_PAWN))
                 emptyNeighborhood.add(neighbor);
 
@@ -238,38 +238,54 @@ abstract public class AbstractBoard<B extends IBoard>
     }
 
     //FIXME Adapt case width to column label size
+    //TODO Build the board template once, then fill it
     @Override
     public final String toString() {
         StringBuilder sb = new StringBuilder();
 
-        int gridSize = getDimension().width * 2 + 1;
+        final int gridSize = getDimension().width * 2 + 1;
+        final int columnOffset = COLUMN_LABELS[COLUMN_LABELS.length - 1].length();
+        final int rowOffset = ROW_LABELS[ROW_LABELS.length - 1].length();
 
         String separatorLine;
         {
             StringBuilder separatorBuilder = new StringBuilder(gridSize + 2);
             separatorBuilder.append('\n');
-            separatorBuilder.append(' ');
-            for (int columnCursor = gridSize; columnCursor-- > 0; )
+            for (int i = rowOffset; i-- > 0; )
+                separatorBuilder.append(' ');
+            for (int columnCursor = getDimension().width; columnCursor-- > 0; ) {
                 separatorBuilder.append('-');
+                for (int i = columnOffset; i-- > 0; )
+                    separatorBuilder.append('-');
+            }
+            separatorBuilder.append('-');
             separatorBuilder.append('\n');
             separatorLine = separatorBuilder.toString();
         }
 
-        sb.append(' ');
+        for (int i = rowOffset; i-- > 0; )
+            sb.append(' ');
         for (String columnCursor : COLUMN_LABELS) {
-            sb.append(' ')
-                    .append(columnCursor);
+            sb.append(' ');
+            for (int i = columnOffset - columnCursor.length(); i-- > 0; )
+                sb.append(' ');
+            sb.append(columnCursor);
         }
 
         //header
         sb.append(separatorLine);
         for (String rowCursor : ROW_LABELS) {
             //line - pawn
-            sb.append(rowCursor)
-                    .append('|');
+            for (int i = rowOffset - rowCursor.length(); i-- > 0; )
+                sb.append(' ');
+            sb.append(rowCursor);
+            sb.append('|');
             for (String columnCursor : COLUMN_LABELS) {
-                sb.append(getPawn(columnCursor, rowCursor))
-                        .append('|');
+                //FIXME Pawn ID can take more than one space
+                for (int i = columnOffset - 1; i-- > 0; )
+                    sb.append(' ');
+                sb.append(getPawn(columnCursor, rowCursor));
+                sb.append('|');
             }
             //line - separator
             sb.append(separatorLine);
