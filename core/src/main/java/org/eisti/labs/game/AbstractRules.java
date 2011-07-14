@@ -2,7 +2,7 @@
  * #%L
  * Core Framework Project
  * %%
- * Copyright (C) 2011 L@ris's Labs
+ * Copyright (C) 2011 MACHIZAUD Andréa
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -30,8 +30,8 @@ import static org.eisti.labs.util.Validation.require;
 abstract public class AbstractRules<B extends IBoard, C extends GameContext<B, C>>
         implements IRules<B, C> {
 
-    private int playerMask;
-    private int pawnMask;
+    private final int playerMask;
+    private final int pawnMask;
 
 //    private int playerBitCursor;
     private int pawnBitCursor;
@@ -64,19 +64,19 @@ abstract public class AbstractRules<B extends IBoard, C extends GameContext<B, C
         pawnMask = ((1 << pawnBitCursor) - 1) << playerBitCursor;
     }
 
-    public int getPlayerMask() {
+    public final int getPlayerMask() {
         return playerMask;
     }
 
-    public int getPawnMask() {
+    public final int getPawnMask() {
         return pawnMask;
     }
 
-    public int getOwnerID(int pawnID) {
+    public final int getOwnerID(final int pawnID) {
         return pawnID & getPlayerMask();
     }
 
-    public int getPawnTypeID(int pawnID) {
+    public final int getPawnTypeID(final int pawnID) {
         return (pawnID & getPawnMask()) >> pawnBitCursor;
     }
 

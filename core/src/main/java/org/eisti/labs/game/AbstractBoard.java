@@ -2,7 +2,7 @@
  * #%L
  * Core Framework Project
  * %%
- * Copyright (C) 2011 L@ris's Labs
+ * Copyright (C) 2011 MACHIZAUD Andréa
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -48,8 +48,8 @@ abstract public class AbstractBoard<B extends IBoard>
      */
     private final Dimension boardDimension;
 
-    private String[] COLUMN_LABELS;
-    private String[] ROW_LABELS;
+    private final String[] COLUMN_LABELS;
+    private final String[] ROW_LABELS;
 
     /**
      * General constructor
@@ -57,7 +57,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * @param width  row size
      * @param height column size
      */
-    protected AbstractBoard(int width, int height) {
+    protected AbstractBoard(final int width, final int height) {
         boardDimension = new Dimension(width, height);
 
         //INFO New column label limit is 26²
@@ -136,7 +136,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * {@inheritDoc}
      */
     @Override
-    public final int getPawn(String column, String row) {
+    public final int getPawn(final String column, final String row) {
         final int boardIndex = translate(column, row);
         return board[boardIndex];
     }
@@ -145,7 +145,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * {@inheritDoc}
      */
     @Override
-    public final int getPawn(Ply.Coordinate coordinate) {
+    public final int getPawn(final Ply.Coordinate coordinate) {
         return getPawn(coordinate.getColumn(), coordinate.getRow());
     }
 
@@ -153,7 +153,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * {@inheritDoc}
      */
     @Override
-    public final void setPawn(String column, String row, int pawnID) {
+    public final void setPawn(final String column, final String row, final int pawnID) {
         board[translate(column, row)] = pawnID;
     }
 
@@ -161,7 +161,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * {@inheritDoc}
      */
     @Override
-    public final void setPawn(Ply.Coordinate coordinate, int pawnID) {
+    public final void setPawn(final Ply.Coordinate coordinate, final int pawnID) {
         setPawn(coordinate.getColumn(), coordinate.getRow(), pawnID);
     }
 
@@ -172,7 +172,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * @param pawnID     - expected pawn
      * @return whether expected pawn is at given location or not
      */
-    public final boolean isAt(Ply.Coordinate coordinate, int pawnID) {
+    public final boolean isAt(final Ply.Coordinate coordinate, final int pawnID) {
         return getPawn(coordinate) == pawnID;
     }
 
@@ -184,7 +184,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * @param pawnID - expected pawn
      * @return whether expected pawn is at given location or not
      */
-    public final boolean isAt(String column, String row, int pawnID) {
+    public final boolean isAt(final String column, final String row, final int pawnID) {
         return getPawn(column, row) == pawnID;
     }
 
@@ -194,10 +194,11 @@ abstract public class AbstractBoard<B extends IBoard>
      * @param center - coordinate of requested case
      * @return coordinates of legal cases around given one
      */
-    abstract public Ply.Coordinate[] getCaseAround(Ply.Coordinate center);
+    abstract public Ply.Coordinate[] getCaseAround(final Ply.Coordinate center);
 
-    public final Ply.Coordinate[] getFreeCaseAround(Ply.Coordinate center) {
-        Collection<Ply.Coordinate> emptyNeighborhood = new ArrayList<Ply.Coordinate>(4);
+    public final Ply.Coordinate[] getFreeCaseAround(final Ply.Coordinate center) {
+        final Ply.Coordinate[] neighborHood = getCaseAround(center);
+        final Collection<Ply.Coordinate> emptyNeighborhood = new ArrayList<Ply.Coordinate>(neighborHood.length);
         for (Ply.Coordinate neighbor : getCaseAround(center))
             if (isAt(neighbor, NO_PAWN))
                 emptyNeighborhood.add(neighbor);
@@ -278,7 +279,7 @@ abstract public class AbstractBoard<B extends IBoard>
     }
 
     @Override
-    public final boolean equals(Object that) {
+    public final boolean equals(final Object that) {
         return that instanceof AbstractBoard
                 && that.hashCode() == this.hashCode();
     }

@@ -2,7 +2,7 @@
  * #%L
  * API Interface Project
  * %%
- * Copyright (C) 2011 L@ris's Labs
+ * Copyright (C) 2011 MACHIZAUD Andréa
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -49,7 +49,7 @@ public interface IBoard
      * @param row    - row label
      * @return pawn at that location
      */
-    public int getPawn(String column, String row);
+    public int getPawn(final String column, final String row);
 
     /**
      * Get the pawn at given position of null if nothing found at that position
@@ -57,7 +57,7 @@ public interface IBoard
      * @param coordinate - board's coordinate
      * @return pawn at that location
      */
-    public int getPawn(Ply.Coordinate coordinate);
+    public int getPawn(final Ply.Coordinate coordinate);
 
     /**
      * Set the pawn at given position of null if nothing found at that position
@@ -66,7 +66,7 @@ public interface IBoard
      * @param row    - row label
      * @param pawnID - pawn to set at given position
      */
-    public void setPawn(String column, String row, int pawnID);
+    public void setPawn(final String column, final String row, final int pawnID);
 
     /**
      * Set the pawn at given position of null if nothing found at that position
@@ -74,7 +74,7 @@ public interface IBoard
      * @param coordinate - board's coordinate
      * @param pawnID     - pawn to set at given position
      */
-    public void setPawn(Ply.Coordinate coordinate, int pawnID);
+    public void setPawn(final Ply.Coordinate coordinate, final int pawnID);
 
     /* Helper for iterate over row|columns */
 

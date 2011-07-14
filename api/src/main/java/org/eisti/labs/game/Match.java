@@ -2,7 +2,7 @@
  * #%L
  * API Interface Project
  * %%
- * Copyright (C) 2011 L@ris's Labs
+ * Copyright (C) 2011 MACHIZAUD Andréa
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -159,6 +159,8 @@ public final class Match
                 }
                 //available for GC
                 playersClassImplementation = null;
+
+                configuration.orderedPlayers(players);
             }
 
             /*=========================================================================

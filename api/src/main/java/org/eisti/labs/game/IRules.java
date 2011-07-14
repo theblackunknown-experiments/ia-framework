@@ -2,7 +2,7 @@
  * #%L
  * API Interface Project
  * %%
- * Copyright (C) 2011 L@ris's Labs
+ * Copyright (C) 2011 MACHIZAUD Andréa
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -32,10 +32,10 @@ import java.util.Set;
 public interface IRules<B extends IBoard, C extends GameContext<B,C>> {
 
     /** Legal moves from this board */
-    public Set<Ply> getLegalMoves(C context);
+    public Set<Ply> getLegalMoves(final C context);
 
     /** Generate sub-board based on given one where playerPly is applied */
-    public C doPly(C previousContext, Ply playerPly);
+    public C doPly(final C previousContext, final Ply playerPly);
 
     public int getNumberOfPlayer();
     public int getNumberOfTypedPawns();

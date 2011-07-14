@@ -26,11 +26,35 @@ package org.eisti.labs.game;
  * @version 7/3/11
  */
 public interface GameConfiguration {
+
+    /**
+     * Provide the IBoard implementation to the framework
+     * @return IBoard implementation
+     */
     public String provideBoardClazz();
 
+    /**
+     * Provide the IRules implementation to the framework
+     * @return IRules implementation
+     */
     public String provideRulesClazz();
 
+    /**
+     * Provide the GameContext implementation to the framework
+     * @return GameContext implementation
+     */
     public String provideContextClazz();
 
+    /**
+     * A shutdown hook to force process or task to end
+     */
     public void shutdownHook();
+
+    /**
+     * <p>Determine in which order player are going to play</p>
+     * <p>First in array will be the first to play</p>
+     * @param players - player array, order follow command-line parameters
+     * @return player ordered in game's turn
+     */
+    public IPlayer[] orderedPlayers(final IPlayer[] players);
 }

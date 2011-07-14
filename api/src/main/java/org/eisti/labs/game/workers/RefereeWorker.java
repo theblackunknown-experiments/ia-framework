@@ -38,7 +38,7 @@ import static org.eisti.labs.util.Validation.require;
  * @author MACHIZAUD Andréa
  * @version 7/3/11
  */
-public class RefereeWorker
+public final class RefereeWorker
         extends GameWorker {
 
     private static final String HINTS_MODE = "hint";

@@ -2,7 +2,7 @@
  * #%L
  * API Interface Project
  * %%
- * Copyright (C) 2011 L@ris's Labs
+ * Copyright (C) 2011 MACHIZAUD Andréa
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -22,6 +22,7 @@
 package org.eisti.labs.game;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 import static org.eisti.labs.util.Validation.require;
 
@@ -57,6 +58,16 @@ public final class Ply {
         this.positionRegistry = Arrays.copyOf(
                 moves,
                 moves.length);
+    }
+
+    /**
+     * Default constructor for any ply,
+     * moves should be inserted in the order
+     * they are means to be applied to the game
+     */
+    public Ply(Collection<Coordinate> moves) {
+        require(moves.size() > 0, "Empty ply, use Ply.PASS for a pass");
+        this.positionRegistry = moves.toArray(new Coordinate[moves.size()]);
     }
 
     /**

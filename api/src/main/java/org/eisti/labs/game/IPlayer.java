@@ -2,7 +2,7 @@
  * #%L
  * API Interface Project
  * %%
- * Copyright (C) 2011 L@ris's Labs
+ * Copyright (C) 2011 MACHIZAUD Andréa
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -42,5 +42,5 @@ public interface IPlayer {
     /**
      * Pawn movement from a player
      */
-    public Ply play(GameContext context, IRules rules);
+    public Ply play(final GameContext context, final IRules rules);
 }

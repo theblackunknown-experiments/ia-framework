@@ -23,34 +23,16 @@ package org.eisti.labs.util;
 
 /**
  * @author MACHIZAUD Andréa
- * @version 17/06/11
+ * @version 7/14/11
  */
-public final class Validation {
-
-    private Validation() { }
-
-    /**
-     * Runtime assert-like
-     *
-     * @param predicate predicate to verified
-     * @param message   error message if not satisfied
-     */
-    public static void require(boolean predicate, String message) {
-        if (!predicate)
-            throw new UnsatisfiedCheck("Predicate not satisfied : " + message);
+public final class Search {
+    private Search() {
     }
 
-    public static boolean nullPresent(Object[] items) {
-        for (int i = items.length; i-- > 0; )
-            if (items[i] == null)
+    public static <T> boolean arrayContains(T[] array, T item) {
+        for (T obj : array)
+            if (obj.equals(item))
                 return true;
         return false;
     }
-
-    public static class UnsatisfiedCheck extends RuntimeException {
-        public UnsatisfiedCheck(String message) {
-            super(message);
-        }
-    }
-
 }

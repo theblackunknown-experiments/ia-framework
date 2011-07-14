@@ -31,7 +31,7 @@ import static org.eisti.labs.util.Validation.require;
  * @author MACHIZAUD Andréa
  * @version 7/3/11
  */
-public class ClockWorker
+public final class ClockWorker
         extends GameWorker {
 
     private Clock currentClock = null;

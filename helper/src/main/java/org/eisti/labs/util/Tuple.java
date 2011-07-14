@@ -2,7 +2,7 @@
  * #%L
  * Helper Framework Project
  * %%
- * Copyright (C) 2011 L@ris's Labs
+ * Copyright (C) 2011 MACHIZAUD Andréa
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -27,9 +27,9 @@ import static org.eisti.labs.util.Validation.require;
  * @author MACHIZAUD Andréa
  * @version 6/20/11
  */
-public class Tuple<K, V> {
-    private K first;
-    private V second;
+public final class Tuple<K, V> {
+    private final K first;
+    private final V second;
 
     /**
      * Factory method
@@ -57,23 +57,23 @@ public class Tuple<K, V> {
         this.second = second;
     }
 
-    public K getFirst() {
+    public final K getFirst() {
         return first;
     }
 
-    public V getSecond() {
+    public final V getSecond() {
         return second;
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return 41 * (
                 41 + first.hashCode()
         ) + second.hashCode();
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         return obj instanceof Tuple
                 && obj.hashCode() == this.hashCode();
     }

@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * @author MACHIZAUD Andréa
  * @version 7/3/11
  */
-public class Clock {
+public final class Clock {
     private long time;
 
     public Clock(long time) {
@@ -40,21 +40,21 @@ public class Clock {
         this.time = unit.toMillis(time);
     }
 
-    public long getTime() {
+    public final long getTime() {
         return time;
     }
 
-    public void setTime(long time) {
+    public final void setTime(long time) {
         this.time = time;
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return Double.toString(time / 1000.0) + "s";
     }
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -65,7 +65,7 @@ public class Clock {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return (int) (time ^ (time >>> 32));
     }
 }

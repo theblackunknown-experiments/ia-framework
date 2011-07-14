@@ -2,7 +2,7 @@
  * #%L
  * Core Framework Project
  * %%
- * Copyright (C) 2011 L@ris's Labs
+ * Copyright (C) 2011 MACHIZAUD Andréa
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -35,7 +35,7 @@ public abstract class AbstractPlayer
      */
     private int identifier = -1;
 
-    public void setIdentifier(int id) {
+    public final void setIdentifier(final int id) {
         this.identifier = id;
     }
 
@@ -43,7 +43,7 @@ public abstract class AbstractPlayer
      * @inheritDoc
      */
     @Override
-    public int getIdentifier() {
+    public final int getIdentifier() {
         return identifier;
     }
 }
