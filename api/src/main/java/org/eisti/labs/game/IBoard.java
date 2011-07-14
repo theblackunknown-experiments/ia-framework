@@ -49,7 +49,7 @@ public interface IBoard
      * @param row    - row label
      * @return pawn at that location
      */
-    public int getPawn(char column, char row);
+    public int getPawn(String column, String row);
 
     /**
      * Get the pawn at given position of null if nothing found at that position
@@ -66,7 +66,7 @@ public interface IBoard
      * @param row    - row label
      * @param pawnID - pawn to set at given position
      */
-    public void setPawn(char column, char row, int pawnID);
+    public void setPawn(String column, String row, int pawnID);
 
     /**
      * Set the pawn at given position of null if nothing found at that position
@@ -83,28 +83,28 @@ public interface IBoard
      *
      * @return label of board's first row
      */
-    public char getFirstRowLabel();
+    public String getFirstRowLabel();
 
     /**
      * Get the label of board's last row
      *
      * @return label of board's last row
      */
-    public char getLastRowLabel();
+    public String getLastRowLabel();
 
     /**
      * Get the label of board's first column
      *
      * @return label of board's first column
      */
-    public char getFirstColumnLabel();
+    public String getFirstColumnLabel();
 
     /**
      * Get the label of board's last column
      *
      * @return label of board's last column
      */
-    public char getLastColumnLabel();
+    public String getLastColumnLabel();
 
     /**
      * hash method

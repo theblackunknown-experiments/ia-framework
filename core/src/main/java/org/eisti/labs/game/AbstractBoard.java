@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
-import static org.eisti.labs.game.Ply.Coordinate.Coordinate;
+import static org.eisti.labs.game.Ply.Coordinate.*;
 
 /**
  * General template for 2D board game
@@ -48,8 +48,8 @@ abstract public class AbstractBoard<B extends IBoard>
      */
     private final Dimension boardDimension;
 
-    private char[] COLUMN_LABELS;
-    private char[] ROW_LABELS;
+    private String[] COLUMN_LABELS;
+    private String[] ROW_LABELS;
 
     /**
      * General constructor
@@ -60,20 +60,22 @@ abstract public class AbstractBoard<B extends IBoard>
     protected AbstractBoard(int width, int height) {
         boardDimension = new Dimension(width, height);
 
-        //FIXME width or height > 26
-        COLUMN_LABELS = new char[width];
-        for (char i = 0; i < width; i++)
-            COLUMN_LABELS[i] = (char) ('A' + i);
+        //INFO New column label limit is 26²
+        COLUMN_LABELS = new String[width];
+        for (int cursor = width; cursor-- > 0; )
+            COLUMN_LABELS[cursor] = columnIndex2Label(cursor);
 
-        ROW_LABELS = new char[height];
-        for (char i = 0; i < height; i++)
-            ROW_LABELS[i] = (char) ('1' + i);
+
+        ROW_LABELS = new String[height];
+        for (int cursor = height; cursor-- > 0; )
+            ROW_LABELS[cursor] = rowIndex2Label(cursor);
 
         final int boardSize = width * height;
         board = new int[boardSize];
 
         for (int i = boardSize; i-- > 0; )
             board[i] = NO_PAWN;
+
         initializeBoard();
     }
 
@@ -89,7 +91,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * {@inheritDoc}
      */
     @Override
-    public final char getFirstRowLabel() {
+    public final String getFirstRowLabel() {
         return ROW_LABELS[0];
     }
 
@@ -97,7 +99,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * {@inheritDoc}
      */
     @Override
-    public final char getLastRowLabel() {
+    public final String getLastRowLabel() {
         return ROW_LABELS[ROW_LABELS.length - 1];
     }
 
@@ -105,7 +107,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * {@inheritDoc}
      */
     @Override
-    public final char getFirstColumnLabel() {
+    public final String getFirstColumnLabel() {
         return COLUMN_LABELS[0];
     }
 
@@ -113,7 +115,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * {@inheritDoc}
      */
     @Override
-    public final char getLastColumnLabel() {
+    public final String getLastColumnLabel() {
         return COLUMN_LABELS[COLUMN_LABELS.length - 1];
     }
 
@@ -124,9 +126,9 @@ abstract public class AbstractBoard<B extends IBoard>
      * @param row    - row label
      * @return corresponding internal board's index
      */
-    private int translate(final char column, final char row) {
-        final int columnInteger = column - getFirstColumnLabel();
-        final int rowInteger = row - getFirstRowLabel();
+    private int translate(final String column, final String row) {
+        final int columnInteger = columnLabel2index(column);
+        final int rowInteger = rowLabel2index(row);
         return rowInteger * getDimension().height + columnInteger;
     }
 
@@ -134,7 +136,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * {@inheritDoc}
      */
     @Override
-    public final int getPawn(char column, char row) {
+    public final int getPawn(String column, String row) {
         final int boardIndex = translate(column, row);
         return board[boardIndex];
     }
@@ -151,7 +153,7 @@ abstract public class AbstractBoard<B extends IBoard>
      * {@inheritDoc}
      */
     @Override
-    public final void setPawn(char column, char row, int pawnID) {
+    public final void setPawn(String column, String row, int pawnID) {
         board[translate(column, row)] = pawnID;
     }
 
@@ -182,61 +184,17 @@ abstract public class AbstractBoard<B extends IBoard>
      * @param pawnID - expected pawn
      * @return whether expected pawn is at given location or not
      */
-    public final boolean isAt(char column, char row, int pawnID) {
+    public final boolean isAt(String column, String row, int pawnID) {
         return getPawn(column, row) == pawnID;
     }
 
-    public final Ply.Coordinate[] getCaseAround(Ply.Coordinate center) {
-        Collection<Ply.Coordinate> neighborhood = new ArrayList<Ply.Coordinate>(4);
-
-        //vertical neighbor
-        char centerRow = center.getRow();
-        if (centerRow == getFirstRowLabel()) {
-            neighborhood.add(
-                    Coordinate(
-                            (char) (center.getRow() + 1),
-                            (char) center.getColumn()));
-        } else if (centerRow == getLastRowLabel()) {
-            neighborhood.add(
-                    Coordinate(
-                            (char) (center.getRow() - 1),
-                            (char) center.getColumn()));
-        } else {
-            neighborhood.add(
-                    Coordinate(
-                            (char) (center.getRow() + 1),
-                            (char) center.getColumn()));
-            neighborhood.add(
-                    Coordinate(
-                            (char) (center.getRow() - 1),
-                            (char) center.getColumn()));
-        }
-
-        char centerColumn = center.getColumn();
-        if (centerColumn == getFirstColumnLabel()) {
-            neighborhood.add(
-                    Coordinate(
-                            (char) center.getRow(),
-                            (char) (center.getColumn() + 1)));
-        } else if (centerColumn == getLastColumnLabel()) {
-            neighborhood.add(
-                    Coordinate(
-                            (char) center.getRow(),
-                            (char) (center.getColumn() - 1)));
-        } else {
-            neighborhood.add(
-                    Coordinate(
-                            (char) center.getRow(),
-                            (char) (center.getColumn() + 1)));
-            neighborhood.add(
-                    Coordinate(
-                            (char) center.getRow(),
-                            (char) (center.getColumn() - 1)));
-        }
-
-        return neighborhood
-                .toArray(new Ply.Coordinate[neighborhood.size()]);
-    }
+    /**
+     * Fetch all neighborhood coordinates of the case at given coordinate
+     *
+     * @param center - coordinate of requested case
+     * @return coordinates of legal cases around given one
+     */
+    abstract public Ply.Coordinate[] getCaseAround(Ply.Coordinate center);
 
     public final Ply.Coordinate[] getFreeCaseAround(Ply.Coordinate center) {
         Collection<Ply.Coordinate> emptyNeighborhood = new ArrayList<Ply.Coordinate>(4);
@@ -257,8 +215,8 @@ abstract public class AbstractBoard<B extends IBoard>
     public final Iterator<Ply.Coordinate> iterator() {
         Collection<Ply.Coordinate> coordinates =
                 new ArrayList<Ply.Coordinate>(getDimension().width + getDimension().height);
-        for (char columnLabel : COLUMN_LABELS)
-            for (char rowLabel : ROW_LABELS)
+        for (String columnLabel : COLUMN_LABELS)
+            for (String rowLabel : ROW_LABELS)
                 coordinates.add(Coordinate(columnLabel, rowLabel));
         return coordinates.iterator();
     }
@@ -278,6 +236,7 @@ abstract public class AbstractBoard<B extends IBoard>
         }
     }
 
+    //FIXME Adapt case width to column label size
     @Override
     public final String toString() {
         StringBuilder sb = new StringBuilder();
@@ -296,19 +255,19 @@ abstract public class AbstractBoard<B extends IBoard>
         }
 
         sb.append(' ');
-        for (char columnCursor : COLUMN_LABELS) {
+        for (String columnCursor : COLUMN_LABELS) {
             sb.append(' ')
                     .append(columnCursor);
         }
 
         //header
         sb.append(separatorLine);
-        for (char rowCursor : ROW_LABELS) {
+        for (String rowCursor : ROW_LABELS) {
             //line - pawn
             sb.append(rowCursor)
                     .append('|');
-            for (char columnCursor : COLUMN_LABELS) {
-                sb.append(getPawn(columnCursor,rowCursor))
+            for (String columnCursor : COLUMN_LABELS) {
+                sb.append(getPawn(columnCursor, rowCursor))
                         .append('|');
             }
             //line - separator

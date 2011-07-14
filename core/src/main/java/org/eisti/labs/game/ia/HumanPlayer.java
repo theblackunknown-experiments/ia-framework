@@ -28,6 +28,7 @@ import org.eisti.labs.game.Ply;
 
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -37,11 +38,15 @@ import java.util.regex.Pattern;
 public final class HumanPlayer
         extends AbstractPlayer {
 
-    //FIXME Limited to 9 rows  and 26 columns
-    public static final Pattern COORDINATE_REGEXP = Pattern.compile("[A-Z][1-9]");
-    public static final Pattern PASS_REGEXP = Pattern.compile("PASS");
+    public static final Pattern COORDINATE_REGEXP = Pattern.compile("([A-Z]+)([1-9]+)");
+    /* Alias to select correct subgroup in regex*/
+    private static final int COLUMN = 1;
+    private static final int ROW = 2;
 
-    //TODO generalize when gui version available
+    public static final Pattern PASS_REGEXP = Pattern.compile("PASS|Pass");
+
+
+    //FIXME generalize when gui version available
     public final Scanner inputReader = new Scanner(System.in);
 
     @Override
@@ -62,13 +67,12 @@ public final class HumanPlayer
             else {
                 Ply.Coordinate[] userMoves = new Ply.Coordinate[coordinates.length];
                 for (int i = coordinates.length; i-- > 0; ) {
-                    String userMove = coordinates[i].trim();
-                    char column = userMove.charAt(0);
-                    char row = userMove.charAt(1);
+                    Matcher userInput = COORDINATE_REGEXP.matcher(coordinates[i]);
+                    String column = userInput.group(COLUMN);
+                    String row = userInput.group(ROW);
 
                     userMoves[i] = new Ply.Coordinate(column, row);
                 }
-
                 return new Ply(userMoves);
             }
         } catch (IllegalStateException e) {

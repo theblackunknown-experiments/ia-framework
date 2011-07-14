@@ -131,7 +131,7 @@ public final class Ply {
             return "PASS Ply";
         else if (positionRegistry.length == 1)
             return String.format(
-                    "Ply(%c,%c)",
+                    "Ply(%s,%s)",
                     positionRegistry[0].getColumn(),
                     positionRegistry[0].getRow());
         else {
@@ -151,31 +151,31 @@ public final class Ply {
      * Representation of a coordinate on a board
      */
     public static final class Coordinate {
-        private final char column;
-        private final char row;
+        private final String column;
+        private final String row;
         private final String representation;
 
-        public static Coordinate Coordinate(final char column, final char row) {
+        public static Coordinate Coordinate(final String column, final String row) {
             return new Coordinate(column, row);
         }
 
         /**
          * Constructor with chess index based parameters
          */
-        public Coordinate(final char column, final char row) {
+        public Coordinate(final String column, final String row) {
             this.column = column;
             this.row = row;
             this.representation = String.format(
-                    "Coordinate(%c,%c)",
+                    "Coordinate(%s,%s)",
                     column,
                     row);
         }
 
-        public final char getRow() {
+        public final String getRow() {
             return row;
         }
 
-        public final char getColumn() {
+        public final String getColumn() {
             return column;
         }
 
@@ -187,8 +187,75 @@ public final class Ply {
         @Override
         public final int hashCode() {
             return 41 * (
-                    41 + row
-            ) + column;
+                    41 + row.hashCode()
+            ) + column.hashCode();
+        }
+
+        /**
+         * Column's label alphabet
+         */
+        public static final String[] ALPHABET = new String[]{
+                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+                "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
+        };
+
+        public static final String BEFORE_FIRST_ROW = "-1";
+        public static final String AFTER_LAST_ROW = "+1";
+        public static final String BEFORE_FIRST_COLUMN = "-1";
+        public static final String AFTER_LAST_COLUMN = "+1";
+
+        /**
+         * Translate a column's label into a array index
+         */
+        public static int columnLabel2index(final String column) {
+            switch (column.length())//Can on have a label column like "A" or "AA" like
+            {
+                case 1:
+                    return column.charAt(0) - 'A';
+                case 2:
+                    return (column.charAt(0) - 'A' + 1) * ALPHABET.length
+                            + column.charAt(1) - 'A';
+                default:
+                    throw new Error("Unexpected case column label size : " + column.length());
+            }
+        }
+
+        /**
+         * Translate a row's label into a array index
+         */
+        public static int rowLabel2index(final String row) {
+            return Integer.parseInt(row) - 1;
+        }
+
+        /**
+         * Translate a column index into a label
+         */
+        public static String columnIndex2Label(final int columnIndex) {
+            switch (columnIndex) {
+                case -1:
+                    return BEFORE_FIRST_COLUMN;
+                case Integer.MAX_VALUE:
+                    return AFTER_LAST_COLUMN;
+                default:
+                    final String prefix = columnIndex < ALPHABET.length
+                            ? ""
+                            : ALPHABET[(columnIndex / ALPHABET.length) - 1];
+                    return prefix + ALPHABET[columnIndex % ALPHABET.length];
+            }
+        }
+
+        /**
+         * Translate a row index into a label
+         */
+        public static String rowIndex2Label(final int rowIndex) {
+            switch (rowIndex) {
+                case -1:
+                    return BEFORE_FIRST_ROW;
+                case Integer.MAX_VALUE:
+                    return AFTER_LAST_ROW;
+                default:
+                    return String.valueOf(rowIndex + 1);
+            }
         }
     }
 
